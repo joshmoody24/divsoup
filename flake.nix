@@ -1,5 +1,5 @@
 {
-  description = "divdump - Phoenix SSE & API";
+  description = "divsoup - serious website analyzer";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
