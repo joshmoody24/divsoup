@@ -1,5 +1,6 @@
 defmodule DivdumpWeb.PageController do
   use DivdumpWeb, :controller
+  alias Divdump.JobService
 
   def home(conn, _params) do
     conn
@@ -12,23 +13,63 @@ defmodule DivdumpWeb.PageController do
   end
 
   def request_analysis(conn, %{"url" => url}) do
-    # Here you would typically call a service to perform the analysis
-    # For now, we'll just simulate it with a simple message
-    analysis_result = "Analysis result for #{url}"
-    encoded_url = URI.encode(url)
+    # Create a job to analyze the URL
+    case JobService.create_job(url) do
+      {:ok, job} ->
+        conn
+        |> put_flash(:info, "Analysis job created and scheduled for #{url}")
+        |> redirect(to: ~p"/job/#{job.id}")
 
-    conn
-    |> put_flash(:info, analysis_result)
-    |> redirect(to: ~p"/analysis/#{encoded_url}")
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Failed to create analysis job: #{inspect(reason)}")
+        |> redirect(to: ~p"/")
+    end
   end
 
-  def analysis_result(conn, %{"url" => url}) do
-    analysis_result = %{
-      url: url,
-      details: "This is a detailed analysis of the URL."
-    }
+  # View a single job by ID
+  def view_job(conn, %{"id" => id}) do
+    job_id = String.to_integer(id)
 
-    conn
-    |> render(:analysis_results, analysis: analysis_result)
+    case JobService.get_job(job_id) do
+      {:ok, %{job: job, job_event: event}} ->
+        conn
+        |> render(:analysis_results, jobs: [{job, event}])
+
+      {:error, reason} ->
+        conn
+        |> put_flash(:error, "Job not found: #{reason}")
+        |> redirect(to: ~p"/")
+    end
+  end
+
+  # List all jobs for a URL
+  def list_jobs_by_url(conn, %{"url" => url}) do
+    # Get all jobs with this URL
+    # For this to work properly, we should add a new function to the JobService
+    # But for now, let's simulate with existing functions
+
+    # A proper implementation would query jobs by their URL
+    # For simplicity, we'll just fetch recent jobs and filter them
+    jobs =
+      case JobService.get_jobs_by_status(:completed, 20) do
+        {:ok, jobs} ->
+          # Filter jobs by URL
+          Enum.filter(jobs, fn {job, _event} ->
+            job.url == url
+          end)
+
+        {:error, _} ->
+          []
+      end
+
+    if Enum.empty?(jobs) do
+      conn
+      |> put_flash(:info, "No completed analysis found for #{url}. Try running a new analysis.")
+      |> redirect(to: ~p"/")
+    else
+      conn
+      |> render(:analysis_results, jobs: jobs)
+    end
   end
 end

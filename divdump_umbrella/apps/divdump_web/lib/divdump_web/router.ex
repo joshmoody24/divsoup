@@ -20,7 +20,10 @@ defmodule DivdumpWeb.Router do
     get "/", PageController, :home
     get "/about", PageController, :about
     post "/request-analysis", PageController, :request_analysis
-    get "/analysis/:url", PageController, :analysis_result
+    
+    # Job routes
+    get "/job/:id", PageController, :view_job
+    get "/jobs/by-url/:url", PageController, :list_jobs_by_url
   end
 
   # Other scopes may use custom stacks.

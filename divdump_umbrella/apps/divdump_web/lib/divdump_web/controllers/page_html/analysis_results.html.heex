@@ -1,1 +1,70 @@
-Analysis results for {@analysis.url}
+<div class="analysis-results">
+  <h1>Analysis Results</h1>
+
+  <%= for {job, event} <- @jobs do %>
+    <article class="job">
+      <h2>Analysis for {job.url}</h2>
+
+      <div class="status">
+        <p>Status: {event.status}</p>
+
+        <%= if event.status == :pending || event.status == :in_progress do %>
+          <div>
+            <p>Your analysis is being processed. This page will refresh automatically.</p>
+            <script>
+              // Auto-refresh the page every 5 seconds if job is not complete
+              setTimeout(function() { 
+                window.location.reload(); 
+              }, 5000);
+            </script>
+          </div>
+        <% end %>
+
+        <%= if event.status == :completed do %>
+          <div>
+            <h3>Results</h3>
+            <%= if event.data && event.data["elements"] do %>
+              <h4>Elements Found:</h4>
+              <ul>
+                <%= for {tag, count} <- event.data["elements"] do %>
+                  <li><code><%= tag %></code>: {count}</li>
+                <% end %>
+              </ul>
+            <% end %>
+
+            <%= if event.data && event.data["meta"] do %>
+              <h4>Page Information:</h4>
+              <ul>
+                <%= for {key, value} <- event.data["meta"] do %>
+                  <li>{key}: {inspect(value)}</li>
+                <% end %>
+              </ul>
+            <% end %>
+
+            <p>Completed at: {job.updated_at}</p>
+          </div>
+        <% end %>
+
+        <%= if event.status == :failed do %>
+          <div>
+            <h3>Analysis Failed</h3>
+            <%= if event.data && event.data.error do %>
+              <p>{event.data.error}</p>
+            <% else %>
+              <p>Unknown error occurred</p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <div>
+        <p>Job ID: {job.id}</p>
+        <p>Created: {job.inserted_at}</p>
+      </div>
+    </article>
+  <% end %>
+
+  <div>
+    <a href="/">Analyze another URL</a>
+  </div>
+</div>

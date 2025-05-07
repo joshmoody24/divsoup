@@ -15,9 +15,9 @@ defmodule Divdump.Application do
       {DNSCluster, query: Application.get_env(:divdump, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Divdump.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: Divdump.Finch}
-      # Start a worker by calling: Divdump.Worker.start_link(arg)
-      # {Divdump.Worker, arg}
+      {Finch, name: Divdump.Finch},
+      # Start the analysis worker
+      {Divdump.Analyzer.Worker, [poll_interval: 5_000]}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Divdump.Supervisor)
