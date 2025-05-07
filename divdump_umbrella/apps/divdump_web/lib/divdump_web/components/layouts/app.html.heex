@@ -1,0 +1,27 @@
+<div class="container">
+  <header>
+    <h1 class="logo">Home</h1>
+  </header>
+
+  <nav class="terminal-nav">
+    <div class="terminal-logo">
+      <div class="logo terminal-prompt"><a href="#" class="no-style">divdump</a></div>
+    </div>
+    <nav class="terminal-menu">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+  </nav>
+
+  <main>
+    <.flash_group flash={@flash} />
+    {@inner_content}
+  </main>
+
+  <footer>
+    <hr />
+    <p>&copy; 2025 Josh Moody</p>
+  </footer>
+</div>
