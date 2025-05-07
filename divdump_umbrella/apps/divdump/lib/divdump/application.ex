@@ -16,6 +16,8 @@ defmodule Divdump.Application do
       {Phoenix.PubSub, name: Divdump.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Divdump.Finch},
+      # Start the job queue
+      {Divdump.Analyzer.JobQueue, []},
       # Start the analysis worker
       {Divdump.Analyzer.Worker, [poll_interval: 5_000]}
     ]

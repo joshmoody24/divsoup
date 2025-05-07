@@ -37,6 +37,59 @@
           --input-style: solid;
           --display-h1-decoration: none;
       }
+      
+      html, body {
+          height: 100%;
+          margin: 0;
+      }
+      
+      .container {
+          min-height: 100%;
+          display: flex;
+          flex-direction: column;
+      }
+      
+      main {
+          flex: 1;
+          padding-top: 30px;
+      }
+      
+      /* Additional spacing for the form on the home page */
+      #analyze-form {
+          margin-top: 20px;
+      }
+      
+      .footer-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+      }
+      
+      .footer-content p {
+          margin: 0;
+      }
+      
+      .job-timing {
+          margin-top: 15px;
+          padding: 10px;
+          background-color: var(--code-bg-color);
+          border-radius: 4px;
+      }
+      
+      .job-timing p {
+          margin: 5px 0;
+      }
+      
+      footer {
+          margin-top: auto;
+          padding-top: 0;
+          padding-bottom: 20px;
+      }
+      
+      footer hr {
+          margin-bottom: 20px;
+      }
     </style>
     {@inner_content}
   </body>

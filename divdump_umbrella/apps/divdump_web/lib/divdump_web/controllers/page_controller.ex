@@ -1,6 +1,6 @@
 defmodule DivdumpWeb.PageController do
   use DivdumpWeb, :controller
-  alias Divdump.JobService
+  alias Divdump.Analyzer.{JobService}
 
   def home(conn, _params) do
     conn
@@ -32,9 +32,9 @@ defmodule DivdumpWeb.PageController do
     job_id = String.to_integer(id)
 
     case JobService.get_job(job_id) do
-      {:ok, %{job: job, job_event: event}} ->
+      {:ok, job} ->
         conn
-        |> render(:analysis_results, jobs: [{job, event}])
+        |> render(:analysis_results, jobs: [job])
 
       {:error, reason} ->
         conn
@@ -55,7 +55,7 @@ defmodule DivdumpWeb.PageController do
       case JobService.get_jobs_by_status(:completed, 20) do
         {:ok, jobs} ->
           # Filter jobs by URL
-          Enum.filter(jobs, fn {job, _event} ->
+          Enum.filter(jobs, fn job ->
             job.url == url
           end)
 

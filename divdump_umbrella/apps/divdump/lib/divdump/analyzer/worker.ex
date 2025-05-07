@@ -5,7 +5,7 @@ defmodule Divdump.Analyzer.Worker do
   """
   use GenServer
   require Logger
-  alias Divdump.JobService
+  alias Divdump.Analyzer.{JobService, JobQueue}
 
   # Client API
   # ----------
@@ -43,10 +43,13 @@ defmodule Divdump.Analyzer.Worker do
 
   @impl true
   def handle_info(:poll, state) do
-    # Try to claim a pending job
-    case JobService.claim_next_pending_job() do
+    # Try to dequeue a job from the JobQueue
+    case JobQueue.dequeue() do
       {:ok, job} ->
-        Logger.info("Worker claimed job #{job.id} for processing")
+        Logger.info("Worker dequeued job #{job.id} for processing")
+        
+        # Mark the job as in_progress (implied by having data or errors but no finished_at)
+        JobService.mark_job_in_progress(job.id)
         
         # Get the server's PID
         server_pid = self()
@@ -59,8 +62,8 @@ defmodule Divdump.Analyzer.Worker do
           send(server_pid, :poll)
         end)
         
-      {:error, reason} ->
-        Logger.debug("No jobs to process: #{reason}")
+      {:error, :empty} ->
+        Logger.debug("No jobs to process: queue is empty")
         # No job found, schedule next poll
         Process.send_after(self(), :poll, state.poll_interval)
     end
@@ -90,7 +93,7 @@ defmodule Divdump.Analyzer.Worker do
       results = analyze_website(job.url)
       
       # Record successful completion with results
-      JobService.append_job_status(job.id, :completed, results)
+      JobService.complete_job(job.id, results)
       
       # Log completion
       elapsed = System.monotonic_time(:millisecond) - start_time
@@ -106,7 +109,7 @@ defmodule Divdump.Analyzer.Worker do
           error: Exception.message(e),
           stacktrace: stacktrace
         }
-        JobService.append_job_status(job.id, :failed, error_data)
+        JobService.fail_job(job.id, error_data)
         
         # Log failure
         elapsed = System.monotonic_time(:millisecond) - start_time

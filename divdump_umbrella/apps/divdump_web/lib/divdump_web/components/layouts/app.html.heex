@@ -22,6 +22,9 @@
 
   <footer>
     <hr />
-    <p>&copy; 2025 Josh Moody</p>
+    <div class="footer-content">
+      <p>&copy; 2025 Josh Moody</p>
+      <p>Queue size: <%= JobQueue.queue_length() %></p>
+    </div>
   </footer>
 </div>

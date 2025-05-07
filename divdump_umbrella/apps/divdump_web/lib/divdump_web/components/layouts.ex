@@ -9,6 +9,7 @@ defmodule DivdumpWeb.Layouts do
   `use DivdumpWeb, :live_view`.
   """
   use DivdumpWeb, :html
+  alias Divdump.Analyzer.JobQueue
 
   embed_templates "layouts/*"
 end
