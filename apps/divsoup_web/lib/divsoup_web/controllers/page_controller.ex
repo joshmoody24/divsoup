@@ -4,11 +4,15 @@ defmodule DivsoupWeb.PageController do
 
   def home(conn, _params) do
     conn
+    |> assign(:title, "home")
+    |> assign(:heading, "divsoup")
     |> render(:home)
   end
 
   def about(conn, _params) do
     conn
+    |> assign(:title, "about")
+    |> assign(:heading, "about divsoup")
     |> render(:about)
   end
 
@@ -34,6 +38,8 @@ defmodule DivsoupWeb.PageController do
     case JobService.get_job(job_id) do
       {:ok, job} ->
         conn
+        |> assign(:title, "analysis")
+        |> assign(:heading, "analysis results")
         |> render(:analysis_results, jobs: [job])
 
       {:error, reason} ->
@@ -69,6 +75,8 @@ defmodule DivsoupWeb.PageController do
       |> redirect(to: ~p"/")
     else
       conn
+      |> assign(:title, "analysis")
+      |> assign(:heading, "url analysis")
       |> render(:analysis_results, jobs: jobs)
     end
   end
