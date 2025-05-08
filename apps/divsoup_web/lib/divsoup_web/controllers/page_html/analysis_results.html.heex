@@ -1,84 +1,85 @@
 <div class="analysis-results">
   <%= for job <- @jobs do %>
-    <article class="job">
+    <article>
       <h2>Analysis results for <a href={job.url} target="_blank">{job.url}</a></h2>
 
-      <div class="status">
-        <p class={[
-          "terminal-alert",
-          case Job.status(job) do
-            :pending -> nil
-            :in_progress -> nil
-            :completed -> "terminal-alert-primary"
-            :failed -> "terminal-alert-error"
-          end
-        ]}>
-          Status: {Job.status(job)}
-        </p>
+      <%= if Job.status(job) == :pending || Job.status(job) == :in_progress do %>
+        <p>Your analysis is being processed. This page will refresh automatically.</p>
+        <script>
+          // Auto-refresh the page every 5 seconds if job is not complete
+          setTimeout(function() { 
+            window.location.reload(); 
+          }, 5000);
+        </script>
+      <% end %>
 
-        <%= if Job.status(job) == :pending || Job.status(job) == :in_progress do %>
+      <%= if Job.status(job) == :completed do %>
+        <div class="terminal-card">
+          <header>Job Details</header>
           <div>
-            <p>Your analysis is being processed. This page will refresh automatically.</p>
-            <script>
-              // Auto-refresh the page every 5 seconds if job is not complete
-              setTimeout(function() { 
-                window.location.reload(); 
-              }, 5000);
-            </script>
-          </div>
-        <% end %>
-
-        <%= if Job.status(job) == :completed do %>
-          <div>
-            <h3>Results</h3>
-            <h4>Analysis Files:</h4>
             <ul>
-              <%= if job.html_url do %>
-                <li><a href={job.html_url} target="_blank">HTML Capture</a></li>
+              <li>Completed at: {job.finished_at}</li>
+              <li>Job ID: {job.id}</li>
+              <li>Created: {job.inserted_at}</li>
+              <%= if job.started_at do %>
+                <li>Started: {job.started_at}</li>
               <% end %>
-
-              <%= if job.screenshot_url do %>
-                <li><a href={job.screenshot_url} target="_blank">Screenshot</a></li>
-              <% end %>
-
-              <%= if job.pdf_url do %>
-                <li><a href={job.pdf_url} target="_blank">PDF Capture</a></li>
+              <%= if job.finished_at do %>
+                <li>Processing time: {Job.duration(job)} seconds</li>
+              <% else %>
+                <%= if job.started_at do %>
+                  <li>Running for: {Job.duration(job)} seconds</li>
+                <% end %>
               <% end %>
             </ul>
-
-            <p>Completed at: {job.finished_at}</p>
           </div>
-        <% end %>
+        </div>
 
-        <%= if Job.status(job) == :failed do %>
-          <div>
-            <h3>Analysis Failed</h3>
-            <%= if job.errors && job.errors["error"] do %>
-              <p>{job.errors["error"]}</p>
-            <% else %>
-              <p>Unknown error occurred</p>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-
-      <div class="job-timing">
-        <p>Job ID: {job.id}</p>
-        <p>Created: {job.inserted_at}</p>
-
-        <%= if job.started_at do %>
-          <p>Started: {job.started_at}</p>
-        <% end %>
-
-        <%= if job.finished_at do %>
-          <p>Finished: {job.finished_at}</p>
-          <p>Processing time: {Job.duration(job)} seconds</p>
-        <% else %>
-          <%= if job.started_at do %>
-            <p>Running for: {Job.duration(job)} seconds</p>
+        <h3>Analysis Files:</h3>
+        <ul>
+          <%= if job.html_url do %>
+            <li><a href={job.html_url} target="_blank">HTML Capture</a></li>
           <% end %>
+
+          <%= if job.screenshot_url do %>
+            <li><a href={job.screenshot_url} target="_blank">Screenshot</a></li>
+          <% end %>
+
+          <%= if job.pdf_url do %>
+            <li><a href={job.pdf_url} target="_blank">PDF Capture</a></li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <%= if Job.status(job) == :failed do %>
+        <h3>Analysis Failed</h3>
+        <%= if job.errors && job.errors["error"] do %>
+          <p>{job.errors["error"]}</p>
+        <% else %>
+          <p>Unknown error occurred</p>
         <% end %>
-      </div>
+
+        <div class="terminal-card">
+          <header>Job Details</header>
+          <div>
+            <ul>
+              <li>Job ID: {job.id}</li>
+              <li>Created: {job.inserted_at}</li>
+              <%= if job.started_at do %>
+                <li>Started: {job.started_at}</li>
+              <% end %>
+              <%= if job.finished_at do %>
+                <li>Failed at: {job.finished_at}</li>
+                <li>Processing time: {Job.duration(job)} seconds</li>
+              <% else %>
+                <%= if job.started_at do %>
+                  <li>Running for: {Job.duration(job)} seconds</li>
+                <% end %>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      <% end %>
     </article>
   <% end %>
 
