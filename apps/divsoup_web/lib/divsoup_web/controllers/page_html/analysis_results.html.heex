@@ -1,12 +1,20 @@
 <div class="analysis-results">
-  <h1>Analysis Results</h1>
-
   <%= for job <- @jobs do %>
     <article class="job">
-      <h2>Analysis for {job.url}</h2>
+      <h2>Analysis results for <a href={job.url} target="_blank">{job.url}</a></h2>
 
       <div class="status">
-        <p>Status: {Job.status(job)}</p>
+        <p class={[
+          "terminal-alert",
+          case Job.status(job) do
+            :pending -> nil
+            :in_progress -> nil
+            :completed -> "terminal-alert-primary"
+            :failed -> "terminal-alert-error"
+          end
+        ]}>
+          Status: {Job.status(job)}
+        </p>
 
         <%= if Job.status(job) == :pending || Job.status(job) == :in_progress do %>
           <div>
