@@ -6,7 +6,9 @@ defmodule Divsoup.Repo.Migrations.CreateAnalysisJobs do
       add :url, :string, null: false
       add :started_at, :utc_datetime
       add :finished_at, :utc_datetime
-      add :data, :map
+      add :html_url, :string
+      add :screenshot_url, :string
+      add :pdf_url, :string
       add :errors, :map
 
       timestamps()

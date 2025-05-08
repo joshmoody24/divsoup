@@ -6,7 +6,9 @@ defmodule Divsoup.Analyzer.Job do
     field :url, :string
     field :started_at, :utc_datetime
     field :finished_at, :utc_datetime
-    field :data, :map
+    field :html_url, :string
+    field :screenshot_url, :string
+    field :pdf_url, :string
     field :errors, :map
 
     timestamps()
@@ -15,7 +17,7 @@ defmodule Divsoup.Analyzer.Job do
   @doc false
   def changeset(job, attrs) do
     job
-    |> cast(attrs, [:url, :started_at, :finished_at, :data, :errors])
+    |> cast(attrs, [:url, :started_at, :finished_at, :html_url, :screenshot_url, :pdf_url, :errors])
     |> validate_required([:url])
   end
   
@@ -30,7 +32,7 @@ defmodule Divsoup.Analyzer.Job do
   Status flow:
   1. Job created → inserted_at set, started_at nil, finished_at nil → :pending
   2. Processing begins → started_at set, finished_at nil → :in_progress
-  3a. Success → finished_at set, data populated → :completed  
+  3a. Success → finished_at set, html_url & screenshot_url populated → :completed  
   3b. Failure → finished_at set, errors populated → :failed
   """
   def status(job) do
@@ -41,8 +43,8 @@ defmodule Divsoup.Analyzer.Job do
       # In Progress: Has start time but no finish time
       not is_nil(job.started_at) && is_nil(job.finished_at) -> :in_progress
       
-      # Completed: Has finish time and data
-      not is_nil(job.finished_at) && not is_nil(job.data) && is_nil(job.errors) -> :completed
+      # Completed: Has finish time and required URLs (HTML and screenshot are required, PDF is optional)
+      not is_nil(job.finished_at) && not is_nil(job.html_url) && not is_nil(job.screenshot_url) && is_nil(job.errors) -> :completed
       
       # Failed: Has finish time and errors
       not is_nil(job.finished_at) && not is_nil(job.errors) -> :failed

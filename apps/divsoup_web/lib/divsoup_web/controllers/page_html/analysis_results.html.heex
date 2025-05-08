@@ -23,23 +23,20 @@
         <%= if Job.status(job) == :completed do %>
           <div>
             <h3>Results</h3>
-            <%= if job.data && job.data["elements"] do %>
-              <h4>Elements Found:</h4>
-              <ul>
-                <%= for {tag, count} <- job.data["elements"] do %>
-                  <li><code><%= tag %></code>: {count}</li>
-                <% end %>
-              </ul>
-            <% end %>
+            <h4>Analysis Files:</h4>
+            <ul>
+              <%= if job.html_url do %>
+                <li><a href={job.html_url} target="_blank">HTML Capture</a></li>
+              <% end %>
 
-            <%= if job.data && job.data["meta"] do %>
-              <h4>Page Information:</h4>
-              <ul>
-                <%= for {key, value} <- job.data["meta"] do %>
-                  <li>{key}: {inspect(value)}</li>
-                <% end %>
-              </ul>
-            <% end %>
+              <%= if job.screenshot_url do %>
+                <li><a href={job.screenshot_url} target="_blank">Screenshot</a></li>
+              <% end %>
+
+              <%= if job.pdf_url do %>
+                <li><a href={job.pdf_url} target="_blank">PDF Capture</a></li>
+              <% end %>
+            </ul>
 
             <p>Completed at: {job.finished_at}</p>
           </div>
@@ -60,11 +57,11 @@
       <div class="job-timing">
         <p>Job ID: {job.id}</p>
         <p>Created: {job.inserted_at}</p>
-        
+
         <%= if job.started_at do %>
           <p>Started: {job.started_at}</p>
         <% end %>
-        
+
         <%= if job.finished_at do %>
           <p>Finished: {job.finished_at}</p>
           <p>Processing time: {Job.duration(job)} seconds</p>

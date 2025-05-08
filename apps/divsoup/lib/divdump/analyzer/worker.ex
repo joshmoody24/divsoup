@@ -5,7 +5,7 @@ defmodule Divsoup.Analyzer.Worker do
   """
   use GenServer
   require Logger
-  alias Divsoup.Analyzer.{JobService, JobQueue}
+  alias Divsoup.Analyzer.{JobService, JobQueue, Browser, S3Storage}
 
   # Client API
 
@@ -103,30 +103,38 @@ defmodule Divsoup.Analyzer.Worker do
   end
 
   defp analyze_website(url) do
-    # Simulate work by sleeping
-    :timer.sleep(2000)
-
-    # Return mock results
-    %{
-      url: url,
-      timestamp: DateTime.utc_now(),
-      elements: %{
-        "div" => :rand.uniform(100),
-        "span" => :rand.uniform(50),
-        "p" => :rand.uniform(30),
-        "a" => :rand.uniform(40),
-        "img" => :rand.uniform(20),
-        "header" => :rand.uniform(5),
-        "footer" => :rand.uniform(2),
-        "main" => :rand.uniform(1)
-      },
-      meta: %{
-        title: "Example Page",
-        has_viewport: true,
-        responsive: true,
-        load_time_ms: :rand.uniform(1000)
+    with {:ok, browser_result} <- Browser.analyze_website(url),
+         {:ok, s3_result} <- S3Storage.upload_analysis_files(
+           browser_result.html_path,
+           browser_result.screenshot_path,
+           browser_result.pdf_path,
+           url,
+           browser_result.timestamp
+         ) do
+      
+      # Return results with both local paths and S3 URLs
+      %{
+        url: url,
+        timestamp: browser_result.timestamp,
+        meta: %{
+          title: "HTML Retrieved", 
+          has_viewport: false,
+          responsive: false,
+          load_time_ms: 0
+        },
+        html_path: browser_result.html_path,
+        screenshot_path: browser_result.screenshot_path,
+        pdf_path: browser_result.pdf_path,
+        s3_html_url: s3_result.html_url,
+        s3_screenshot_url: s3_result.screenshot_url,
+        s3_pdf_url: s3_result.pdf_url
       }
-    }
+    else
+      {:error, reason} ->
+        # If any step fails, log and raise an error to trigger job failure
+        Logger.error("Website analysis failed: #{reason}")
+        raise "Website analysis failed: #{reason}"
+    end
   end
 end
 

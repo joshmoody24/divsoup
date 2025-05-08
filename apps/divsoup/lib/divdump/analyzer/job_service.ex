@@ -45,9 +45,9 @@ defmodule Divsoup.Analyzer.JobService do
   end
 
   @doc """
-  Mark a job as in-progress by updating its timestamp and any partial data
+  Mark a job as in-progress by updating its timestamp
   """
-  def mark_job_in_progress(id, partial_data \\ nil) do
+  def mark_job_in_progress(id) do
     job = Repo.get(Job, id)
 
     case job do
@@ -57,8 +57,7 @@ defmodule Divsoup.Analyzer.JobService do
       _ ->
         job
         |> Job.changeset(%{
-          started_at: DateTime.utc_now(),
-          data: partial_data
+          started_at: DateTime.utc_now()
         })
         |> Repo.update()
     end
@@ -81,7 +80,9 @@ defmodule Divsoup.Analyzer.JobService do
         job
         |> Job.changeset(%{
           started_at: started_at,
-          data: results,
+          html_url: results.s3_html_url,
+          screenshot_url: results.s3_screenshot_url,
+          pdf_url: results.s3_pdf_url,
           finished_at: DateTime.utc_now()
         })
         |> Repo.update()
@@ -132,9 +133,9 @@ defmodule Divsoup.Analyzer.JobService do
           limit: ^limit
           
       :completed ->
-        # Jobs with finished_at time and data but no errors
+        # Jobs with finished_at time, HTML and screenshot URLs (PDF is optional), but no errors
         from j in Job,
-          where: not is_nil(j.finished_at) and not is_nil(j.data) and is_nil(j.errors),
+          where: not is_nil(j.finished_at) and not is_nil(j.html_url) and not is_nil(j.screenshot_url) and is_nil(j.errors),
           order_by: [{^order_by_direction, j.inserted_at}],
           limit: ^limit
           

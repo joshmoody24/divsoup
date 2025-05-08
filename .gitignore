@@ -22,8 +22,18 @@ erl_crash.dump
 # Temporary files, for example, from tests.
 /tmp/
 
-
 # Database files
 *.db
 *.db-*
 
+# Environment variables
+.env
+.env.*
+
+# Infrastructure as Code
+/iac/.terraform/
+/iac/*.tfstate
+/iac/*.tfstate.backup
+/iac/.terraform.lock.hcl
+
+**/.claude/settings.local.json
