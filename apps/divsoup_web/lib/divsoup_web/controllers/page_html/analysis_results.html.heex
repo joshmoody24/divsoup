@@ -35,6 +35,18 @@
           </div>
         </div>
 
+        <%= if length(@achievements) > 0 do %>
+          <h3>Achievements:</h3>
+        <% end %>
+        <%= for achievement <- @achievements do %>
+          <div class="terminal-card">
+            <header>{achievement.title}</header>
+            <div>
+              {achievement.description}
+            </div>
+          </div>
+        <% end %>
+
         <h3>Analysis Files:</h3>
         <ul>
           <%= if job.html_url do %>

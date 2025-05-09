@@ -33,11 +33,11 @@ defmodule DivsoupWeb.PageController do
   def view_job(conn, %{"id" => id}) do
     job_id = String.to_integer(id)
 
-    case JobService.get_job(job_id) do
-      {:ok, job} ->
+    case JobService.get_job_with_metrics(job_id) do
+      {:ok, results} ->
         conn
         |> assign(:title, "Analysis")
-        |> render(:analysis_results, jobs: [job])
+        |> render(:analysis_results, jobs: [results.job], achievements: results.achievements)
 
       {:error, reason} ->
         conn
