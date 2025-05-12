@@ -14,19 +14,27 @@ defmodule Divsoup.AchievementList do
     try do
       # First check if it's loaded and has the right name pattern
       # Then check if it implements the required callbacks
-      Code.ensure_loaded?(module) and
-        module_name_matches_pattern?(module) and
-        function_exported?(module, :evaluate, 1) and
-        function_exported?(module, :achievement, 0)
+      is_loaded = Code.ensure_loaded?(module)
+      has_pattern = module_name_matches_pattern?(module)
+      has_evaluate = function_exported?(module, :evaluate, 2)
+      has_achievement = function_exported?(module, :achievement, 0)
+
+      is_loaded and has_pattern and has_evaluate and has_achievement
     rescue
-      _ -> false
+      error ->
+        IO.puts("Error checking module #{inspect(module)}: #{inspect(error)}")
+        false
     end
   end
 
   # Check if module name follows the pattern for achievement rules
   defp module_name_matches_pattern?(module) do
     module_string = Atom.to_string(module)
-    String.starts_with?(module_string, "Elixir.Divsoup.Achievement") and
-    not String.ends_with?(module_string, "List")
+
+    result =
+      String.starts_with?(module_string, "Elixir.Divsoup.Achievement") and
+        not String.ends_with?(module_string, "List")
+
+    result
   end
 end

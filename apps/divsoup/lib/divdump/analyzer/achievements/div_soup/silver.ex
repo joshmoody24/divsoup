@@ -1,4 +1,4 @@
-defmodule Divsoup.Achievement.DivSoupBronze do
+defmodule Divsoup.Achievement.DivSoupSilver do
   alias Divsoup.Achievement
 
   @behaviour Divsoup.AchievementRule
@@ -7,7 +7,7 @@ defmodule Divsoup.Achievement.DivSoupBronze do
   def evaluate(html_tree, _) do
     ratio = Divsoup.Util.DivSoup.get_div_ratio(html_tree)
 
-    if ratio > 0.25 do
+    if ratio > 0.50 do
       []
     else
       ["Only #{ratio * 100}% of the HTML elements in the page are divs"]
@@ -17,10 +17,10 @@ defmodule Divsoup.Achievement.DivSoupBronze do
   @impl true
   def achievement() do
     %Achievement{
-      hierarchy: :bronze,
-      title: "Div Broth",
+      hierarchy: :silver,
+      title: "Div Soup",
       group: "div_soup",
-      description: "More than 25% of the HTML elements in the page are divs"
+      description: "More than 50% of the HTML elements in the page are divs"
     }
   end
 end

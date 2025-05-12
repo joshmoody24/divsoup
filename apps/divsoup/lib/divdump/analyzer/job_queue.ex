@@ -62,7 +62,6 @@ defmodule Divsoup.Analyzer.JobQueue do
         {:reply, {:ok, job}, %{state | queue: new_queue}}
 
       {:empty, _queue} ->
-        Logger.debug("Attempted to dequeue from empty queue")
         {:reply, {:error, :empty}, state}
     end
   end
@@ -72,3 +71,4 @@ defmodule Divsoup.Analyzer.JobQueue do
     {:reply, :queue.len(queue), state}
   end
 end
+

@@ -66,7 +66,7 @@ defmodule Divsoup.Analyzer.JobService do
 
                   %{
                     achievement: achievement.achievement(),
-                    fulfills_criteria: achievement.evaluate(parsed_html)
+                    fulfills_criteria: Enum.empty?(achievement.evaluate(parsed_html, body))
                   }
                 end)
                 |> Enum.filter(fn result -> result.fulfills_criteria end)
