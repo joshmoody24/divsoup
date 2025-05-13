@@ -11,7 +11,7 @@ defmodule Divsoup.Achievement.LoremIpsum do
        |> String.contains?("lorem ipsum") do
       []
     else
-      ["The page does not contain the text \"lorem ipsum\""]
+      ["Page does not contain the text \"lorem ipsum\""]
     end
   end
 

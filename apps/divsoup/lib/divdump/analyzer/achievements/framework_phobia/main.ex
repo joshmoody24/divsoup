@@ -3,7 +3,7 @@ defmodule Divsoup.Achievement.FrameworkPhobia do
   Detects pages that define a custom element but don’t rely on a JS framework.
 
   Success (returns `[]`) when:
-    • The page contains at least one custom element (`<x-foo>` syntax)  
+    • Page contains at least one custom element (`<x-foo>` syntax)  
     • No React/Angular/Vue/etc. frameworks are detected
 
   Otherwise, returns all reasons why the rule failed.
@@ -20,8 +20,8 @@ defmodule Divsoup.Achievement.FrameworkPhobia do
     has_custom = contains_custom_element?(raw_html_string)
 
     [
-      !has_custom && "The page does not contain a custom element",
-      frameworks != [] && "The page uses JS frameworks: " <> Enum.join(frameworks, ", ")
+      !has_custom && "Page does not contain a custom element",
+      frameworks != [] && "Page uses JS frameworks: " <> Enum.join(frameworks, ", ")
     ]
     |> Enum.filter(& &1)
   end
@@ -38,7 +38,7 @@ defmodule Divsoup.Achievement.FrameworkPhobia do
       hierarchy: nil,
       title: "Framework Phobia",
       group: "framework_phobia",
-      description: "The page contains a custom element and does not use a JS framework"
+      description: "Page contains a custom element and does not use a JS framework"
     }
   end
 end

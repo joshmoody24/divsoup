@@ -8,7 +8,7 @@ defmodule Divsoup.Achievement.LocalityOfAppearance do
     if more_styles_than_classes(html_tree) do
       []
     else
-      ["The page has more classes than styles"]
+      ["Page has more classes than styles"]
     end
   end
 
@@ -34,7 +34,7 @@ defmodule Divsoup.Achievement.LocalityOfAppearance do
       hierarchy: nil,
       title: "Locality of Appearance",
       group: "locality_of_appearance",
-      description: "The page has more CSS in style attributes than class attributes"
+      description: "Page has more CSS in style attributes than class attributes"
     }
   end
 end

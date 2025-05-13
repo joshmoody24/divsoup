@@ -37,15 +37,15 @@ defmodule Divsoup.Achievement.ScriptonitePlatinum do
                 # All checks passed — this is plaintext
                 []
               else
-                ["The page structure is close, but <head> or <pre> contains unexpected content"]
+                ["Page structure is close, but <head> or <pre> contains unexpected content"]
               end
 
             _ ->
-              ["The page contains HTML elements beyond a single <pre> tag in <body>"]
+              ["Page contains HTML elements beyond a single <pre> tag in <body>"]
           end
 
         _ ->
-          ["The page is not wrapped in a single <html> element"]
+          ["Page is not wrapped in a single <html> element"]
       end
     end
   end
@@ -56,7 +56,7 @@ defmodule Divsoup.Achievement.ScriptonitePlatinum do
       hierarchy: :platinum,
       title: "Always bet on text",
       group: "lynx",
-      description: "The page is entirely plaintext - no CSS, JavaScript, or HTML elements"
+      description: "Page is entirely plaintext - no CSS, JavaScript, or HTML elements"
     }
   end
 end

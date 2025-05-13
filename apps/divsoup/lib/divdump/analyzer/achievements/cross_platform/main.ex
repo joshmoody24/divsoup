@@ -37,7 +37,7 @@ defmodule Divsoup.Achievement.CrossPlatform do
         []
 
       detected ->
-        ["The page contains browser-specific CSS: " <> Enum.join(detected, ", ")]
+        ["Page contains browser-specific CSS: " <> Enum.join(detected, ", ")]
     end
   end
 
@@ -47,7 +47,7 @@ defmodule Divsoup.Achievement.CrossPlatform do
       hierarchy: nil,
       title: "Cross Platform",
       group: "cross_platform",
-      description: "The page contains no browser-specific CSS, e.g., -webkit-, -moz-, -o-, -ms-"
+      description: "Page contains no browser-specific CSS, e.g., -webkit-, -moz-, -o-, -ms-"
     }
   end
 end

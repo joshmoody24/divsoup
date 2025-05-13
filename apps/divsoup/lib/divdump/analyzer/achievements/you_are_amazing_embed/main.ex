@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.YouAreAmazingEmbed do
       hierarchy: nil,
       title: "Incredible Embed",
       group: "vintage",
-      description: "The page embeds external content via <object>, <embed>, or <iframe>"
+      description: "Page embeds external content via <object>, <embed>, or <iframe>"
     }
   end
 end

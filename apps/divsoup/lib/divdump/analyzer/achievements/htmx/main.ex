@@ -9,7 +9,7 @@ defmodule Divsoup.Achievement.Htmx do
 
     case references_htmx do
       true -> []
-      false -> ["The page does not contain the phrase \"htmx\""]
+      false -> ["Page does not contain the phrase \"htmx\""]
     end
   end
 
@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.Htmx do
       hierarchy: nil,
       title: "HTMX Simp",
       group: "htmx",
-      description: "The page contains a reference to HTMX"
+      description: "Page contains a reference to HTMX"
     }
   end
 end

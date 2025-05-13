@@ -1,7 +1,7 @@
 defmodule Divsoup.Achievement.BlindPersonHater do
   @moduledoc """
   Detects pages with poor accessibility: 
-  • The majority of images lack non‐empty `alt` attributes  
+  • Majority of images lack non‐empty `alt` attributes  
   • No ARIA attributes appear anywhere on the page
   """
 
@@ -37,13 +37,13 @@ defmodule Divsoup.Achievement.BlindPersonHater do
         []
 
       {true, false} ->
-        ["The majority of images lack alt tags"]
+        ["Majority of images lack alt tags"]
 
       {false, true} ->
         ["No ARIA attributes appear on the page"]
 
       {false, false} ->
-        ["The majority of images have alt tags", "ARIA attributes appear on the page"]
+        ["Majority of images have alt tags", "ARIA attributes appear on the page"]
     end
   end
 
@@ -53,8 +53,7 @@ defmodule Divsoup.Achievement.BlindPersonHater do
       hierarchy: nil,
       title: "Blind Person Hater",
       group: "blind_person_hater",
-      description:
-        "The majority of images lack alt tags and/or no ARIA attributes appear on the page"
+      description: "Majority of images lack alt tags and/or no ARIA attributes appear on the page"
     }
   end
 end

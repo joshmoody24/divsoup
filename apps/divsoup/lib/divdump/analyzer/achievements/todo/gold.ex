@@ -14,7 +14,7 @@ defmodule Divsoup.Achievement.TodoGold do
     if todo_count >= 12 do
       []
     else
-      ["The page contains the phrase \"TODO\" #{todo_count} times"]
+      ["Page contains the phrase \"TODO\" #{todo_count} times"]
     end
   end
 
@@ -24,7 +24,7 @@ defmodule Divsoup.Achievement.TodoGold do
       hierarchy: :gold,
       title: "Todoism",
       group: "htmx",
-      description: "The page contains the phrase \"TODO\" a dozen or more times"
+      description: "Page contains the phrase \"TODO\" a dozen or more times"
     }
   end
 end

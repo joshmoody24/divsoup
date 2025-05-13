@@ -10,7 +10,7 @@ defmodule Divsoup.Achievement.Quirky do
     if quirks_mode do
       []
     else
-      ["The page does not render in quirks mode"]
+      ["Page does not render in quirks mode"]
     end
   end
 
@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.Quirky do
       hierarchy: nil,
       title: "Quirky",
       group: "quirky",
-      description: "The page renders in quirks mode"
+      description: "Page renders in quirks mode"
     }
   end
 end

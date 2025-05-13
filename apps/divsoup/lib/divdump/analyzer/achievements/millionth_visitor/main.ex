@@ -12,7 +12,7 @@ defmodule Divsoup.Achievement.MillionthVisitor do
       []
       |> add_if(
         blink_count == 0 and marquee_count == 0,
-        "The page does not use a <blink> or <marquee> element"
+        "Page does not use a <blink> or <marquee> element"
       )
 
     messages
@@ -32,7 +32,7 @@ defmodule Divsoup.Achievement.MillionthVisitor do
       hierarchy: nil,
       title: "Millionth Visitor!!!",
       group: "millionth_visitor",
-      description: "The page uses a <blink> or <marquee> element"
+      description: "Page uses a <blink> or <marquee> element"
     }
   end
 end

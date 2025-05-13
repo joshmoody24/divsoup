@@ -18,7 +18,7 @@ defmodule Divsoup.Achievement.Impa do
         []
 
       false ->
-        ["The page does not use the Shadow DOM"]
+        ["Page does not use the Shadow DOM"]
     end
   end
 

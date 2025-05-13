@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.DictionaryEnthusiast do
     if has_dfn? or has_definition_list? do
       []
     else
-      ["The page does not use definition elements (<dfn> or <dl> with <dt> and <dd>)"]
+      ["Page does not use definition elements (<dfn> or <dl> with <dt> and <dd>)"]
     end
   end
 

@@ -16,7 +16,7 @@ defmodule Divsoup.Achievement.SlotMachine do
     if found_three_in_a_row? do
       []
     else
-      ["The page does not use three <slot> elements in a row in a <template>"]
+      ["Page does not use three <slot> elements in a row in a <template>"]
     end
   end
 

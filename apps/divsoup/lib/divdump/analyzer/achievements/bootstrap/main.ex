@@ -11,7 +11,7 @@ defmodule Divsoup.Achievement.Bootstrap do
 
     if Enum.empty?(bootstrap_references) do
       [
-        "The page does not contain a reference to Bootstrap"
+        "Page does not contain a reference to Bootstrap"
       ]
     else
       []
@@ -24,7 +24,7 @@ defmodule Divsoup.Achievement.Bootstrap do
       hierarchy: nil,
       title: "Not like the other girls",
       group: "bootstrap",
-      description: "The page links to Bootstrap CSS or JS"
+      description: "Page links to Bootstrap CSS or JS"
     }
   end
 end

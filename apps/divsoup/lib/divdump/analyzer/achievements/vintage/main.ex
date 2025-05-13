@@ -10,7 +10,7 @@ defmodule Divsoup.Achievement.Vintage do
     if length(nested_tables) > 0 do
       []
     else
-      ["The page does not use nested table layouts"]
+      ["Page does not use nested table layouts"]
     end
   end
 
@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.Vintage do
       hierarchy: nil,
       title: "Vintage",
       group: "vintage",
-      description: "The page uses nested table layouts"
+      description: "Page uses nested table layouts"
     }
   end
 end

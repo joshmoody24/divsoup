@@ -14,7 +14,7 @@ defmodule Divsoup.Achievement.TodoSilver do
     if todo_count >= 3 do
       []
     else
-      ["The page contains the phrase \"TODO\" #{todo_count} times"]
+      ["Page contains the phrase \"TODO\" #{todo_count} times"]
     end
   end
 
@@ -24,7 +24,7 @@ defmodule Divsoup.Achievement.TodoSilver do
       hierarchy: :silver,
       title: "Fix me, please",
       group: "htmx",
-      description: "The page contains the phrase \"TODO\" at least 3 times"
+      description: "Page contains the phrase \"TODO\" at least 3 times"
     }
   end
 end
