@@ -4,7 +4,7 @@ defmodule Divsoup.Achievement.CrossPlatformTest do
 
   alias Divsoup.Achievement.CrossPlatform
 
-  test "earns achievement when page has no vendor-prefixed CSS" do
+  test "doesn't earn achievement when page has no vendor-prefixed CSS" do
     html = """
     <html>
       <head>
@@ -28,10 +28,10 @@ defmodule Divsoup.Achievement.CrossPlatformTest do
     </html>
     """
 
-    assert_achievement_earned(CrossPlatform, html)
+    assert_achievement_not_earned(CrossPlatform, html)
   end
 
-  test "doesn't earn achievement with -webkit- prefixed CSS" do
+  test "earns achievement with -webkit- prefixed CSS" do
     html = """
     <html>
       <head>
@@ -51,10 +51,10 @@ defmodule Divsoup.Achievement.CrossPlatformTest do
     </html>
     """
 
-    assert_achievement_not_earned(CrossPlatform, html)
+    assert_achievement_earned(CrossPlatform, html)
   end
 
-  test "doesn't earn achievement with -moz- prefixed CSS" do
+  test "earns achievement with -moz- prefixed CSS" do
     html = """
     <html>
       <head>
@@ -74,10 +74,10 @@ defmodule Divsoup.Achievement.CrossPlatformTest do
     </html>
     """
 
-    assert_achievement_not_earned(CrossPlatform, html)
+    assert_achievement_earned(CrossPlatform, html)
   end
 
-  test "doesn't earn achievement with multiple vendor prefixes" do
+  test "earns achievement with multiple vendor prefixes" do
     html = """
     <html>
       <head>
@@ -99,6 +99,6 @@ defmodule Divsoup.Achievement.CrossPlatformTest do
     </html>
     """
 
-    assert_achievement_not_earned(CrossPlatform, html)
+    assert_achievement_earned(CrossPlatform, html)
   end
 end

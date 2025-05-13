@@ -1,7 +1,7 @@
 defmodule Divsoup.Achievement.CrossPlatform do
   @moduledoc """
-  Detects pages that are truly cross‐platform by ensuring
-  no vendor‐prefixed CSS properties (`-webkit-`, `-moz-`, `-o-`, `-ms-`) appear.
+  Detects pages that use browser-specific CSS properties to
+  ensure a fragmented ecosystem (`-webkit-`, `-moz-`, `-o-`, `-ms-`).
   """
 
   alias Divsoup.Achievement
@@ -34,10 +34,10 @@ defmodule Divsoup.Achievement.CrossPlatform do
 
     case prefixes do
       [] ->
-        []
+        ["No browser-specific CSS found"]
 
-      detected ->
-        ["Page contains browser-specific CSS: " <> Enum.join(detected, ", ")]
+      _detected ->
+        [] # Achievement earned when browser-specific CSS is present
     end
   end
 
@@ -45,9 +45,9 @@ defmodule Divsoup.Achievement.CrossPlatform do
   def achievement do
     %Achievement{
       hierarchy: nil,
-      title: "Cross Platform",
+      title: "Fragmented Ecosystem",
       group: "cross_platform",
-      description: "Page contains no browser-specific CSS, e.g., -webkit-, -moz-, -o-, -ms-"
+      description: "Page contains browser-specific CSS, e.g., -webkit-, -moz-, -o-, -ms-"
     }
   end
 end
