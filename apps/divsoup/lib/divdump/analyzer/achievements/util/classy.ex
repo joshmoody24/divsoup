@@ -8,7 +8,6 @@ defmodule Divsoup.Util.Classy do
       Floki.find(html_tree, "*[class]")
       |> Enum.map(&Floki.attribute(&1, "class"))
       |> Enum.join(" ")
-      |> IO.inspect(label: "Class attribute")
       |> String.length()
 
     document_size = raw_html_string |> String.length()
