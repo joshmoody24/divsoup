@@ -18,7 +18,7 @@ defmodule Divsoup.Achievement.YouAreAmazingEmbed do
   def achievement() do
     %Achievement{
       hierarchy: nil,
-      title: "You're Probably Amazing Embed",
+      title: "Incredible Embed",
       group: "vintage",
       description: "The page embeds external content via <object>, <embed>, or <iframe>"
     }

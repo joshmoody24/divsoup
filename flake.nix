@@ -24,7 +24,6 @@
             opentofu
           ];
           shellHook = ''
-            export MIX_ENV=dev
             export SECRET_KEY_BASE=$(mix phx.gen.secret)
             
             # Load environment variables from .env file if it exists
