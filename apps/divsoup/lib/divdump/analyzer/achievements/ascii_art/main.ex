@@ -49,109 +49,124 @@ defmodule Divsoup.Achievement.AsciiArt do
     if is_likely_code?(comment) do
       false
     else
-      # Enhanced criteria for ASCII art:
-      # 1. At least 3 non-empty lines, OR
-      # 2. Contains common ASCII art patterns, OR
-      # 3. Has sufficient density of special characters
-      
+      # ASCII art must have at least 5 non-empty lines
       lines_count = length(lines)
       
-      # More comprehensive list of ASCII art characters
-      ascii_art_chars = ["+", "-", "|", "/", "\\", "*", "=", ">", "<", "^", "(", ")", "[", "]", "{", "}", "_", ".", ":", ";", "'", "`", "~", "#", "@"]
-      
-      # Common ASCII art patterns (bunny, faces, boxes, etc.)
-      ascii_art_patterns = [
-        ~r/\(\s*[oO0\-_\^\\\/]\s*[_.,-]\s*[oO0\-_\^\\\/]\s*\)/,  # Face patterns like (o.o), (^_^)
-        ~r/[<>]\s*[\^v\-_]\s*[<>]/,                             # Face patterns like >_<, <^>
-        ~r/\+[-_=]+\+/,                                         # Box top/bottom like +----+
-        ~r/\|[^|]{2,}\|/,                                       # Box sides like |  text  |
-        ~r/\/[\\\/]/,                                           # Slashes like /\, //
-        ~r/[_~\-=]{3,}/,                                        # Repeated horizontal lines
-        ~r/[|:]{2,}/,                                           # Repeated vertical lines
-        ~r/[\/\\]{2,}/,                                         # Repeated slashes
-        ~r/\\\\_\/\\\\/                                         # Bunny ears pattern
-      ]
-      
-      # Join all lines
-      text = Enum.join(lines, " ")
-      
-      # Check for common patterns
-      has_ascii_pattern = Enum.any?(ascii_art_patterns, fn pattern -> 
-        Regex.match?(pattern, text)
-      end)
-      
-      # Count special characters
-      special_char_count = 
-        ascii_art_chars
-        |> Enum.map(fn char -> 
-          text 
-          |> String.graphemes 
-          |> Enum.count(fn c -> c == char end)
+      if lines_count < 5 do
+        # Too few lines to be ASCII art
+        false
+      else
+        # More comprehensive list of ASCII art characters
+        ascii_art_chars = ["+", "-", "|", "/", "\\", "*", "=", ">", "<", "^", "(", ")", "[", "]", "{", "}", "_", ".", ":", ";", "'", "`", "~", "#", "@"]
+        
+        # Common ASCII art patterns (bunny, faces, boxes, etc.)
+        ascii_art_patterns = [
+          ~r/\(\s*[oO0\-_\^\\\/]\s*[_.,-]\s*[oO0\-_\^\\\/]\s*\)/,  # Face patterns like (o.o), (^_^)
+          ~r/[<>]\s*[\^v\-_]\s*[<>]/,                             # Face patterns like >_<, <^>
+          ~r/\+[-_=]+\+/,                                         # Box top/bottom like +----+
+          ~r/\|[^|]{2,}\|/,                                       # Box sides like |  text  |
+          ~r/\/[\\\/]/,                                           # Slashes like /\, //
+          ~r/[_~\-=]{3,}/,                                        # Repeated horizontal lines
+          ~r/[|:]{2,}/,                                           # Repeated vertical lines
+          ~r/[\/\\]{2,}/,                                         # Repeated slashes
+          ~r/\\\\_\/\\\\/                                         # Bunny ears pattern
+        ]
+        
+        # Join all lines
+        text = Enum.join(lines, " ")
+        
+        # Check for common patterns
+        has_ascii_pattern = Enum.any?(ascii_art_patterns, fn pattern -> 
+          Regex.match?(pattern, text)
         end)
-        |> Enum.sum()
-      
-      # Calculate density of special characters
-      text_length = String.length(text)
-      special_char_density = if text_length > 0, do: special_char_count / text_length, else: 0
-      
-      # Different ASCII art characters present
-      unique_special_chars = 
-        ascii_art_chars
-        |> Enum.filter(fn char -> String.contains?(text, char) end)
-        |> length()
-      
-      # Determine if it's ASCII art based on various factors
-      cond do
-        # Has an obvious ASCII art pattern
-        has_ascii_pattern -> true
         
-        # Has at least 3 lines and good density of special chars
-        lines_count >= 3 and special_char_density > 0.05 and unique_special_chars >= 3 -> true
+        # Count special characters
+        special_char_count = 
+          ascii_art_chars
+          |> Enum.map(fn char -> 
+            text 
+            |> String.graphemes 
+            |> Enum.count(fn c -> c == char end)
+          end)
+          |> Enum.sum()
         
-        # Has many unique special characters
-        unique_special_chars >= 6 -> true
+        # Calculate density of special characters
+        text_length = String.length(text)
+        special_char_density = if text_length > 0, do: special_char_count / text_length, else: 0
         
-        # Has high density of special characters
-        special_char_density > 0.15 -> true
+        # Different ASCII art characters present
+        unique_special_chars = 
+          ascii_art_chars
+          |> Enum.filter(fn char -> String.contains?(text, char) end)
+          |> length()
         
-        # Not ASCII art
-        true -> false
+        # Determine if it's ASCII art based on various factors - 
+        # require either pattern match or good density of special characters
+        has_ascii_pattern || (special_char_density > 0.05 && unique_special_chars >= 3)
       end
     end
   end
   
   # Check if a comment likely contains code rather than ASCII art
   defp is_likely_code?(comment) do
-    # Calculate evidence score using pipe-based composition
-    code_evidence = 
-      0
-      |> add_evidence(String.match?(comment, ~r/https?:\/\/|\.js|src=|href=/i), 3)
-      |> add_evidence(String.match?(comment, ~r/function\s*\(|var\s+|let\s+|const\s+|if\s*\(|else\s*{|return\s+|import\s+|export\s+|class\s+/), 3)
-      |> add_evidence(String.match?(comment, ~r/<[a-z][a-z0-9]*(\s+[^>]*)?>/i), 3)
-      |> add_evidence(String.match?(comment, ~r/\[if.*\]/), 5)
-      |> add_alphanumeric_evidence(comment)
+    # Definitive code markers that aren't typically in ASCII art
+    definitive_code_markers = [
+      "[if", 
+      "function",
+      "var ",
+      "class=",
+      "<script",
+      "</script>",
+      "<![endif]"
+    ]
     
-    # If we have strong evidence this is code, not ASCII art
-    code_evidence >= 3
-  end
-  
-  # Helper function to add evidence if condition is true
-  defp add_evidence(current_evidence, condition, value) do
-    if condition, do: current_evidence + value, else: current_evidence
-  end
-  
-  # Helper function to add evidence based on alphanumeric ratio
-  defp add_alphanumeric_evidence(current_evidence, comment) do
-    text = String.replace(comment, ~r/\s/, "")
+    # Check if any definitive code markers are present
+    has_code_markers = Enum.any?(definitive_code_markers, fn marker ->
+      String.contains?(comment, marker)
+    end)
     
-    if text != "" do
-      alphanumeric_count = Regex.replace(~r/[^a-zA-Z0-9]/, text, "") |> String.length()
-      alphanumeric_ratio = alphanumeric_count / String.length(text)
-      
-      # Code typically has high alphanumeric content
-      if alphanumeric_ratio > 0.7, do: current_evidence + 2, else: current_evidence
+    # If any code markers are found, it's likely code
+    if has_code_markers do
+      true
     else
-      current_evidence
+      # Check for ASCII art-like lines
+      lines = comment |> String.split("\n") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
+      
+      # Need multiple lines to check for ASCII art patterns
+      if length(lines) >= 3 do
+        # ASCII art symbols (more limited, focused set)
+        art_symbols = ["/", "\\", "|", "-", "_", "+", "=", ">", "<", "^", "(", ")"]
+        
+        # Count lines that have ASCII art characteristics
+        art_like_lines = Enum.count(lines, fn line ->
+          # Remove spaces to work with content only
+          content = String.replace(line, " ", "")
+          
+          if String.length(content) > 0 do
+            # Count art symbols
+            symbol_count = Enum.sum(Enum.map(art_symbols, fn symbol ->
+              String.graphemes(content) |> Enum.count(fn c -> c == symbol end)
+            end))
+            
+            # Line is art-like if >30% of its content is art symbols
+            symbol_count / String.length(content) > 0.3
+          else
+            false
+          end
+        end)
+        
+        # If more than 1/3 of lines look like ASCII art, it's probably not code
+        art_like_ratio = art_like_lines / length(lines)
+        art_like_ratio < 0.33
+      else
+        # Too few lines to analyze patterns, check alphanumeric dominance
+        text = String.replace(comment, ~r/\s/, "")
+        alphanumeric_count = Regex.replace(~r/[^a-zA-Z0-9]/, text, "") |> String.length()
+        alphanumeric_ratio = alphanumeric_count / String.length(text)
+        
+        # Code is predominantly alphanumeric
+        alphanumeric_ratio > 0.7
+      end
     end
   end
 end
