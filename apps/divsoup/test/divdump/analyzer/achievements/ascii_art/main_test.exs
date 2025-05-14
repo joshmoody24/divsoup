@@ -93,4 +93,23 @@ defmodule Divsoup.Achievement.AsciiArtTest do
 
     assert_achievement_not_earned(AsciiArt, html)
   end
+
+  test "commented-out code does not count as ASCII art" do
+    html = """
+    <html>
+      <head>
+        <title>ASCII Art Test</title>
+        <!-- This is a regular comment -->
+      </head>
+      <body>
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->  </body>
+    </html>
+    """
+
+    assert_achievement_not_earned(AsciiArt, html)
+  end
 end
+
