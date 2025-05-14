@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.TowerOfBabel do
     if length(lang_values) >= 2 do
       []
     else
-      ["The page does not contain at least 2 different lang attributes"]
+      ["Page does not contain at least 2 different lang attributes"]
     end
   end
 
@@ -30,7 +30,7 @@ defmodule Divsoup.Achievement.TowerOfBabel do
       hierarchy: nil,
       title: "Tower of Babel",
       group: "tower_of_babel",
-      description: "The page contains at least 2 lang attributes with different values"
+      description: "Page contains at least 2 lang attributes with different values"
     }
   end
 end

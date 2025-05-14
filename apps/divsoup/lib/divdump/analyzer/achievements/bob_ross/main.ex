@@ -12,7 +12,7 @@ defmodule Divsoup.Achievement.BobRoss do
     if length(canvas_elements) > 0 or length(picture_elements) > 0 do
       []
     else
-      ["The page does not include a <canvas> element or <picture> element"]
+      ["Page does not include a <canvas> element or <picture> element"]
     end
   end
 
@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.BobRoss do
       hierarchy: nil,
       title: "Bob Ross",
       group: "bob_ross",
-      description: "The page includes a <canvas> or <picture> element"
+      description: "Page includes a <canvas> or <picture> element"
     }
   end
 end

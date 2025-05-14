@@ -15,7 +15,7 @@ defmodule Divsoup.Achievement.HyperlinkCollectorBronze do
     if domain_count >= @min_domains do
       []
     else
-      ["The page only links to #{domain_count} different external domains, needs at least #{@min_domains}"]
+      ["Page only links to #{domain_count} different external domains, needs at least #{@min_domains}"]
     end
   end
 
@@ -25,7 +25,7 @@ defmodule Divsoup.Achievement.HyperlinkCollectorBronze do
       hierarchy: :bronze,
       title: "Hyperlink Collector",
       group: "hyperlink_collector",
-      description: "The page links to at least #{@min_domains} different external domains"
+      description: "Page links to at least #{@min_domains} different external domains"
     }
   end
 end

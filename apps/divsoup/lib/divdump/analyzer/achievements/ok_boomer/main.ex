@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.OkBoomer do
     if deprecated_elements_used != [] do
       []
     else
-      ["The page doesn't use any deprecated HTML elements"]
+      ["Page doesn't use any deprecated HTML elements"]
     end
   end
 
@@ -29,7 +29,7 @@ defmodule Divsoup.Achievement.OkBoomer do
       hierarchy: nil,
       title: "OK Boomer",
       group: "ok_boomer",
-      description: "The page uses a deprecated HTML element"
+      description: "Page uses a deprecated HTML element"
     }
   end
 end

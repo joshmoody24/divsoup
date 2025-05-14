@@ -163,4 +163,90 @@ defmodule Divsoup.Util.Html do
   def is_deprecated?(element) do
     Map.get(html_elements(), element) == :deprecated
   end
+  
+  @doc """
+  Get a list of all standard HTML elements.
+  
+  Returns a list of element names (strings).
+  """
+  def standard_elements do
+    html_elements()
+    |> Enum.filter(fn {_element, status} -> status == :standard end)
+    |> Enum.map(fn {element, _status} -> element end)
+  end
+  
+  @doc """
+  Get a list of all HTML elements (standard, deprecated, and experimental).
+  
+  Returns a list of element names (strings).
+  """
+  def all_elements do
+    html_elements() |> Map.keys()
+  end
+  
+  @doc """
+  Count the total number of standard HTML elements.
+  
+  Returns an integer representing the number of standard HTML elements.
+  """
+  def count_standard_elements do
+    standard_elements() |> length()
+  end
+  
+  @doc """
+  Count the total number of all HTML elements (including deprecated and experimental).
+  
+  Returns an integer representing the total number of HTML elements.
+  """
+  def count_all_elements do
+    all_elements() |> length()
+  end
+  
+  @doc """
+  Filter a list of element names to only include valid HTML elements.
+  
+  ## Parameters
+  - `element_names`: List of element names as strings
+  
+  ## Returns
+  - List of valid HTML element names (those that exist in the HTML spec)
+  """
+  def filter_valid_elements(element_names) do
+    element_names
+    |> Enum.filter(fn element -> Map.has_key?(html_elements(), element) end)
+  end
+  
+  @doc """
+  Count the number of valid HTML elements used in an HTML tree.
+  
+  ## Parameters
+  - `html_tree`: Floki parsed HTML tree
+  
+  ## Returns
+  - Count of unique valid HTML elements used in the tree
+  """
+  def count_valid_elements_used(html_tree) do
+    Floki.find(html_tree, "*")
+    |> Enum.map(fn {element, _, _} -> element end)
+    |> Enum.uniq()
+    |> filter_valid_elements()
+    |> length()
+  end
+  
+  @doc """
+  Get all valid HTML elements used in an HTML tree.
+  
+  ## Parameters
+  - `html_tree`: Floki parsed HTML tree
+  
+  ## Returns
+  - Set of valid HTML element names used in the tree
+  """
+  def get_valid_elements_used(html_tree) do
+    Floki.find(html_tree, "*")
+    |> Enum.map(fn {element, _, _} -> element end)
+    |> Enum.uniq()
+    |> filter_valid_elements()
+    |> MapSet.new()
+  end
 end

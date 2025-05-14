@@ -48,7 +48,7 @@ defmodule Divsoup.Achievement.BulletHell do
     if has_bullet_list and length(html_list_elements) == 0 do
       []
     else
-      ["The page does not use unicode bullet points to create a list instead of <ul> elements"]
+      ["Page does not use unicode bullet points to create a list instead of <ul> elements"]
     end
   end
 
@@ -58,7 +58,7 @@ defmodule Divsoup.Achievement.BulletHell do
       hierarchy: nil,
       title: "Bullet Hell",
       group: "bullet_hell",
-      description: "The page uses unicode bullet points to create a list instead of using <ul>"
+      description: "Page uses unicode bullet points to create a list instead of using <ul>"
     }
   end
 end
