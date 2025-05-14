@@ -249,4 +249,58 @@ defmodule Divsoup.Util.Html do
     |> filter_valid_elements()
     |> MapSet.new()
   end
+  
+  @doc """
+  List of HTML void elements (elements that cannot have content).
+  """
+  def void_elements do
+    [
+      "area",
+      "base",
+      "br",
+      "col",
+      "embed",
+      "hr",
+      "img",
+      "input",
+      "link",
+      "meta",
+      "source",
+      "track",
+      "wbr"
+    ]
+  end
+  
+  @doc """
+  Analyze void elements in raw HTML to determine how they are closed.
+  
+  ## Parameters
+  - `raw_html`: Raw HTML string
+  
+  ## Returns
+  A map with counts of:
+  - `:with_slash`: The number of void elements with self-closing slash
+  - `:without_slash`: The number of void elements without self-closing slash
+  - `:total`: Total number of void elements found
+  """
+  def analyze_void_elements(raw_html) do
+    void_elems = void_elements()
+    
+    # Build patterns to match void elements with or without trailing slash
+    results = Enum.reduce(void_elems, %{with_slash: 0, without_slash: 0}, fn elem, acc ->
+      # Pattern for self-closing tags with slash: <tag ... />
+      with_slash_pattern = ~r/<#{elem}[^>]*\/>/i
+      with_slash_count = Enum.count(Regex.scan(with_slash_pattern, raw_html))
+      
+      # Pattern for tags without slash: <tag ...> (not followed by </tag>)
+      without_slash_pattern = ~r/<#{elem}[^>\/]*>(?!.*<\/#{elem}>)/i
+      without_slash_count = Enum.count(Regex.scan(without_slash_pattern, raw_html))
+      
+      Map.update(acc, :with_slash, with_slash_count, &(&1 + with_slash_count))
+      |> Map.update(:without_slash, without_slash_count, &(&1 + without_slash_count))
+    end)
+    
+    # Add total count
+    Map.put(results, :total, results.with_slash + results.without_slash)
+  end
 end
