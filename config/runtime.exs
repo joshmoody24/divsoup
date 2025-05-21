@@ -7,16 +7,37 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  database_path =
-    System.get_env("DATABASE_PATH") ||
-      raise """
-      environment variable DATABASE_PATH is missing.
-      For example: /etc/divsoup/divsoup.db
-      """
+  db_adapter = System.get_env("DB_ADAPTER")
+  
+  # Configure database based on adapter - defaults to Postgres in production
+  if db_adapter == "sqlite" do
+    database_path =
+      System.get_env("DATABASE_PATH") ||
+        raise """
+        environment variable DATABASE_PATH is missing.
+        For example: /etc/divsoup/divsoup.db
+        """
 
-  config :divsoup, Divsoup.Repo,
-    database: database_path,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
+    config :divsoup, Divsoup.Repo,
+      database: database_path,
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
+  else
+    # PostgreSQL Aurora Serverless v2 configuration
+    database_url =
+      System.get_env("DATABASE_URL") ||
+        raise """
+        environment variable DATABASE_URL is missing.
+        For example: postgres://USER:PASS@HOST/DATABASE
+        """
+    
+    # Parse connection params
+    maybe_ipv6 = if System.get_env("ECTO_IPV6"), do: [:inet6], else: []
+
+    config :divsoup, Divsoup.Repo,
+      url: database_url,
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+      socket_options: maybe_ipv6
+  end
 
   import Config
 

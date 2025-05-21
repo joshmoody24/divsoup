@@ -6,12 +6,11 @@ terraform {
     }
   }
   
-  # You can uncomment this block to store state in S3 once bucket is created
-  # backend "s3" {
-  #   bucket = "divsoup-terraform-state"
-  #   key    = "terraform/state"
-  #   region = "us-west-1"
-  # }
+  backend "s3" {
+    bucket = "divsoup-terraform-state"
+    key    = "terraform/state"
+    region = "us-west-1"
+  }
 }
 
 provider "aws" {
@@ -22,22 +21,19 @@ provider "aws" {
 }
 
 # S3 bucket for storing website analysis
+# Set lifecycle to prevent destruction of existing bucket
 resource "aws_s3_bucket" "analysis_bucket" {
   bucket = var.bucket_name
+  
+  # Prevent Terraform from trying to delete the bucket
+  lifecycle {
+    prevent_destroy = true
+  }
   
   tags = {
     Name        = "DivSoup Analysis Storage"
     Environment = var.environment
     Project     = "DivSoup"
-  }
-}
-
-# Enable versioning for the S3 bucket (optional)
-resource "aws_s3_bucket_versioning" "bucket_versioning" {
-  bucket = aws_s3_bucket.analysis_bucket.id
-  
-  versioning_configuration {
-    status = "Enabled"
   }
 }
 
@@ -125,7 +121,6 @@ data "aws_iam_policy_document" "bucket_access_policy" {
   }
 }
 
-# IAM role for EC2 if you plan to deploy to EC2 (optional)
 resource "aws_iam_role" "divsoup_role" {
   count = var.create_iam_role ? 1 : 0
   
@@ -170,4 +165,508 @@ output "bucket_name" {
 
 output "bucket_arn" {
   value = aws_s3_bucket.analysis_bucket.arn
+}
+
+# Aurora Serverless v2 PostgreSQL Cluster
+resource "aws_rds_cluster" "divsoup_aurora" {
+  cluster_identifier      = "divsoup-aurora-postgres"
+  engine                  = "aurora-postgresql"
+  engine_mode             = "provisioned"
+  engine_version          = "17.4"  # Using PostgreSQL 17.4
+  database_name           = "divsoup_prod"
+  master_username         = "postgres"
+  master_password         = var.db_password
+  
+  # Cost optimization settings
+  backup_retention_period = 1  # Minimum backup retention period
+  skip_final_snapshot     = true  # No final snapshot needed for cost savings
+  deletion_protection     = false  # Allow deletion to avoid accidental charges
+  
+  vpc_security_group_ids  = [aws_security_group.divsoup_aurora_sg.id]
+  db_subnet_group_name    = aws_db_subnet_group.divsoup_aurora_subnet.name
+  
+  # Enable scaling to 0 ACUs with auto-pause after 5 minutes
+  serverlessv2_scaling_configuration {
+    min_capacity = 0.0  # Can scale to zero when inactive
+    max_capacity = 1.0  # Maximum 1 ACU for this side project
+    seconds_until_auto_pause = 300  # 5 minutes = 300 seconds
+  }
+
+  tags = {
+    Name        = "DivSoup Aurora PostgreSQL"
+    Environment = var.environment
+    Project     = "DivSoup"
+  }
+}
+
+# Aurora Serverless v2 Instance
+resource "aws_rds_cluster_instance" "divsoup_aurora_instance" {
+  cluster_identifier   = aws_rds_cluster.divsoup_aurora.id
+  identifier           = "divsoup-aurora-instance"
+  engine               = aws_rds_cluster.divsoup_aurora.engine
+  engine_version       = aws_rds_cluster.divsoup_aurora.engine_version
+  instance_class       = "db.serverless"
+  db_subnet_group_name = aws_db_subnet_group.divsoup_aurora_subnet.name
+  
+  tags = {
+    Name        = "DivSoup Aurora Instance"
+    Environment = var.environment
+    Project     = "DivSoup"
+  }
+}
+
+# Create a VPC for DivSoup resources
+resource "aws_vpc" "divsoup_vpc" {
+  cidr_block                       = "10.0.0.0/16"
+  enable_dns_support               = true
+  enable_dns_hostnames             = true
+  assign_generated_ipv6_cidr_block = true  # Enable IPv6
+  
+  tags = {
+    Name    = "divsoup-vpc-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Create a random suffix for resource names
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
+# Create public subnets (for EC2 instance)
+resource "aws_subnet" "divsoup_public_subnet" {
+  count                           = 2
+  vpc_id                          = aws_vpc.divsoup_vpc.id
+  cidr_block                      = "10.0.${count.index + 1}.0/24"
+  availability_zone               = "${var.aws_region}${count.index == 0 ? "b" : "c"}"
+  map_public_ip_on_launch         = false  # No public IPv4
+  assign_ipv6_address_on_creation = true  # Assign IPv6 addresses automatically
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.divsoup_vpc.ipv6_cidr_block, 8, count.index)
+
+  tags = {
+    Name    = "divsoup-public-subnet-${count.index + 1}-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Create private subnets (for Aurora DB)
+resource "aws_subnet" "divsoup_private_subnet" {
+  count                           = 2
+  vpc_id                          = aws_vpc.divsoup_vpc.id
+  cidr_block                      = "10.0.${count.index + 10}.0/24"
+  availability_zone               = "${var.aws_region}${count.index == 0 ? "b" : "c"}"
+  assign_ipv6_address_on_creation = true
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.divsoup_vpc.ipv6_cidr_block, 8, count.index + 10)
+
+  tags = {
+    Name    = "divsoup-private-subnet-${count.index + 1}-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Create internet gateway for public subnets
+resource "aws_internet_gateway" "divsoup_igw" {
+  vpc_id = aws_vpc.divsoup_vpc.id
+
+  tags = {
+    Name    = "divsoup-igw-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Create route table for public subnets
+resource "aws_route_table" "divsoup_public_rt" {
+  vpc_id = aws_vpc.divsoup_vpc.id
+
+  # IPv6 route
+  route {
+    ipv6_cidr_block = "::/0"
+    gateway_id      = aws_internet_gateway.divsoup_igw.id
+  }
+
+  tags = {
+    Name    = "divsoup-public-rt-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Associate public subnets with the public route table
+resource "aws_route_table_association" "divsoup_public_rta" {
+  count          = 2
+  subnet_id      = aws_subnet.divsoup_public_subnet[count.index].id
+  route_table_id = aws_route_table.divsoup_public_rt.id
+}
+
+# Subnet group for Aurora
+resource "aws_db_subnet_group" "divsoup_aurora_subnet" {
+  name       = "divsoup-aurora-subnet-group-${random_string.suffix.result}"
+  subnet_ids = aws_subnet.divsoup_private_subnet[*].id
+
+  tags = {
+    Name    = "divsoup-aurora-subnet-group-${random_string.suffix.result}"
+    Project = "DivSoup"
+  }
+}
+
+# Security group for Aurora
+resource "aws_security_group" "divsoup_aurora_sg" {
+  name        = "divsoup-aurora-sg-${random_string.suffix.result}"
+  description = "Security group for DivSoup Aurora Serverless v2"
+  vpc_id      = aws_vpc.divsoup_vpc.id
+
+  # Allow connections from EC2 instance security group
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.divsoup_app_sg.id]
+  }
+  
+  # Allow connections from anywhere (for local development)
+  # For production, limit this to your office/home IP
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "DivSoup Aurora Security Group"
+    Project = "DivSoup"
+  }
+}
+
+# Store database credentials in Parameter Store (free tier)
+resource "aws_ssm_parameter" "db_username" {
+  name        = "/divsoup/db/username"
+  description = "Aurora Serverless v2 PostgreSQL username"
+  type        = "String"
+  value       = aws_rds_cluster.divsoup_aurora.master_username
+  
+  tags = {
+    Name    = "DivSoup DB Username"
+    Project = "DivSoup"
+  }
+}
+
+resource "aws_ssm_parameter" "db_password" {
+  name        = "/divsoup/db/password"
+  description = "Aurora Serverless v2 PostgreSQL password"
+  type        = "SecureString"
+  value       = aws_rds_cluster.divsoup_aurora.master_password
+  
+  tags = {
+    Name    = "DivSoup DB Password"
+    Project = "DivSoup"
+  }
+}
+
+resource "aws_ssm_parameter" "db_endpoint" {
+  name        = "/divsoup/db/host"
+  description = "Aurora Serverless v2 PostgreSQL endpoint"
+  type        = "String"
+  value       = aws_rds_cluster.divsoup_aurora.endpoint
+  
+  tags = {
+    Name    = "DivSoup DB Host"
+    Project = "DivSoup"
+  }
+}
+
+resource "aws_ssm_parameter" "db_port" {
+  name        = "/divsoup/db/port"
+  description = "Aurora Serverless v2 PostgreSQL port"
+  type        = "String"
+  value       = aws_rds_cluster.divsoup_aurora.port
+  
+  tags = {
+    Name    = "DivSoup DB Port"
+    Project = "DivSoup"
+  }
+}
+
+resource "aws_ssm_parameter" "db_name" {
+  name        = "/divsoup/db/name"
+  description = "Aurora Serverless v2 PostgreSQL database name"
+  type        = "String"
+  value       = aws_rds_cluster.divsoup_aurora.database_name
+  
+  tags = {
+    Name    = "DivSoup DB Name"
+    Project = "DivSoup"
+  }
+}
+
+resource "aws_instance" "divsoup_app" {
+  ami                         = var.app_ami_id
+  instance_type               = "t4g.nano"
+  key_name                    = var.ssh_key_name
+  iam_instance_profile        = aws_iam_instance_profile.divsoup_app_profile.name
+
+  # ─── Let Terraform create the ENI ───
+  subnet_id                   = aws_subnet.divsoup_public_subnet[0].id
+  vpc_security_group_ids      = [aws_security_group.divsoup_app_sg.id]
+
+  associate_public_ip_address = false  # no IPv4
+  ipv6_address_count          = 1      # auto-assign one IPv6 :contentReference[oaicite:2]{index=2}
+
+  root_block_device {
+    volume_size = 8
+    volume_type = "gp3"
+  }
+
+  user_data = <<EOF
+#!/bin/bash
+set -eux
+
+echo "127.0.1.1 $(hostname)" >> /etc/hosts
+
+# 1) Update & install base packages
+apt-get update -y
+apt-get install -y git curl unzip build-essential \
+automake autoconf libncurses5-dev libssl-dev \
+zlib1g-dev libssh-dev unixodbc-dev \
+libxml2-dev libxslt1-dev
+
+# 2) Install AWS CLI v2
+curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o /tmp/awscliv2.zip
+unzip /tmp/awscliv2.zip -d /tmp
+/tmp/aws/install
+
+# 3) Override DNS to use nat64.net (DNS64)
+printf '%s\n' \
+'nameserver 2a00:1098:2b::1' \
+'nameserver 2a01:4f8:c2c:123f::1' \
+'nameserver 2a01:4f9:c010:3f02::1' \
+'options timeout:1 attempts:3' \
+> /etc/resolv.conf
+
+# 4) Switch to the 'ubuntu' user for runtime setup
+sudo -iu ubuntu bash <<'UBUNTU_EOF'
+set +e
+
+# b) Install Erlang & Elixir via official installer
+curl -fsSL https://elixir-lang.org/install.sh | tee /tmp/elixir-install.sh | bash -s -- elixir@1.18.3 otp@27.2.3
+
+set -eux
+echo "Erlang & Elixir installed"
+
+# i) Create symlinks for Elixir & Erlang binaries
+for bin in /home/ubuntu/.elixir-install/installs/otp/27.2.3/bin/* /home/ubuntu/.elixir-install/installs/elixir/1.18.3-otp-27/bin/*; do
+  sudo ln -sf "$bin" /usr/local/bin/$(basename "$bin")
+done
+
+# d) Clone DivSoup app
+git clone https://github.com/joshmoody24/divsoup.git ~/divsoup
+cd ~/divsoup
+
+# e) Fetch DB credentials from SSM
+export REGION=${var.aws_region}
+export DB_USER=$(aws ssm get-parameter --name "/divsoup/db/username" --region "$REGION" --query "Parameter.Value" --output text)
+export DB_PASSWORD=$(aws ssm get-parameter --name "/divsoup/db/password" --region "$REGION" --with-decryption --query "Parameter.Value" --output text)
+export DB_HOST=$(aws ssm get-parameter --name "/divsoup/db/host" --region "$REGION" --query "Parameter.Value" --output text)
+export DB_PORT=$(aws ssm get-parameter --name "/divsoup/db/port" --region "$REGION" --query "Parameter.Value" --output text)
+export DB_NAME=$(aws ssm get-parameter --name "/divsoup/db/name" --region "$REGION" --query "Parameter.Value" --output text)
+
+# f) Write environment file as root
+sudo tee /etc/divsoup.env > /dev/null <<ENVFILE
+export MIX_ENV=prod
+export PHX_SERVER=true
+export PORT=80
+export DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
+export SECRET_KEY_BASE=$(mix phx.gen.secret)
+ENVFILE
+
+# g) Build Phoenix app
+mix local.hex --force
+mix local.rebar --force
+mix deps.get --only prod
+mix compile
+mix phx.digest
+
+# h) Verify installation
+elixir --version
+erl -noshell -eval 'io:format("OK~n"), init:stop()'
+UBUNTU_EOF
+
+# 5) Create & enable systemd service
+cat > /etc/systemd/system/divsoup.service <<SERVICE
+[Unit]
+Description=DivSoup Phoenix App
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/divsoup
+EnvironmentFile=/etc/divsoup.env
+ExecStart=/usr/local/bin/mix phx.server
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable divsoup
+systemctl start divsoup
+EOF
+
+
+  tags = {
+    Name        = "DivSoup App Server"
+    Environment = var.environment
+    Project     = "DivSoup"
+  }
+}
+
+# Security group for application
+resource "aws_security_group" "divsoup_app_sg" {
+  name        = "divsoup-app-sg-${random_string.suffix.result}"
+  description = "Security group for DivSoup application"
+  vpc_id      = aws_vpc.divsoup_vpc.id
+  
+  # HTTP IPv6
+  ingress {
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  # HTTPS IPv6
+  ingress {
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  # SSH IPv6
+  ingress {
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  # Outbound (both IPv4 and IPv6)
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
+  tags = {
+    Name    = "DivSoup App Security Group"
+    Project = "DivSoup"
+  }
+}
+
+# IAM role for EC2 instance
+resource "aws_iam_role" "divsoup_app_role" {
+  name = "divsoup-app-role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+  
+  tags = {
+    Project = "DivSoup"
+  }
+}
+
+# IAM policy for accessing Parameter Store and S3
+resource "aws_iam_policy" "divsoup_app_policy" {
+  name        = "divsoup-app-policy"
+  description = "Policy for DivSoup application to access resources"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Effect   = "Allow"
+        Resource = [
+          aws_ssm_parameter.db_username.arn,
+          aws_ssm_parameter.db_password.arn,
+          aws_ssm_parameter.db_endpoint.arn,
+          aws_ssm_parameter.db_port.arn,
+          aws_ssm_parameter.db_name.arn
+        ]
+      },
+      {
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "s3:DeleteObject"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_s3_bucket.analysis_bucket.arn,
+          "${aws_s3_bucket.analysis_bucket.arn}/*"
+        ]
+      },
+      {
+        Action = [
+          "rds:DescribeDBClusters"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Attach policy to role
+resource "aws_iam_role_policy_attachment" "divsoup_app_attachment" {
+  role       = aws_iam_role.divsoup_app_role.name
+  policy_arn = aws_iam_policy.divsoup_app_policy.arn
+}
+
+# Create instance profile
+resource "aws_iam_instance_profile" "divsoup_app_profile" {
+  name = "divsoup-app-profile"
+  role = aws_iam_role.divsoup_app_role.name
+}
+
+output "app_ipv6" {
+  value       = aws_instance.divsoup_app.ipv6_addresses[0]
+  description = "Auto-assigned IPv6 address of the application server"
+}
+
+# Output the RDS cluster endpoint
+output "aurora_endpoint" {
+  value = aws_rds_cluster.divsoup_aurora.endpoint
+  description = "Aurora cluster endpoint for database connections"
+}
+
+output "aurora_port" {
+  value = aws_rds_cluster.divsoup_aurora.port
+  description = "Aurora cluster port"
 }

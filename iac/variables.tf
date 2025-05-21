@@ -33,3 +33,43 @@ variable "create_iam_role" {
   type        = bool
   default     = false
 }
+
+variable "db_password" {
+  description = "Password for the database"
+  type        = string
+  sensitive   = true
+}
+
+# VPC and subnets are auto-created
+
+variable "allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to connect to the database"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # Replace with more restrictive IPs in production
+}
+
+variable "app_ami_id" {
+  description = "AMI ID"
+  type        = string
+  default     = "ami-01fe939b39edeeaa4" // Ubuntu 24.04 LTS
+}
+
+# EC2 instance subnet is automatically created
+
+variable "ssh_key_name" {
+  description = "Name of SSH key pair to use for EC2 instance"
+  type        = string
+  default     = ""  # This must be set in your tfvars file
+}
+
+variable "ssh_cidr_blocks" {
+  description = "CIDR blocks allowed to SSH into the EC2 instance"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # Allow SSH from anywhere (consider restricting this in production)
+}
+
+variable "static_ipv6_address" {
+  description = "Specific IPv6 address to assign to the EC2 instance (optional)"
+  type        = string
+  default     = ""  # If empty, an address will be automatically assigned
+}

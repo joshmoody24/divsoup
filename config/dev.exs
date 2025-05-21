@@ -2,8 +2,11 @@ import Config
 
 # Configure your database
 config :divsoup, Divsoup.Repo,
-  database: Path.expand("../divsoup_dev.db", __DIR__),
-  pool_size: 5,
+  username: "postgres",
+  password: System.get_env("DB_PASSWORD") || "postgres",
+  hostname: System.get_env("DB_HOST") || "localhost",
+  database: "divsoup_dev",
+  pool_size: 10,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true
 

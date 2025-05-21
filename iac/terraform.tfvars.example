@@ -1,0 +1,20 @@
+# Example Terraform variables - COPY TO terraform.tfvars and fill in your actual values
+
+# AWS region
+aws_region = "us-west-1"
+
+# Bucket name for analysis data
+bucket_name = "divsoup"
+
+# Environment 
+environment = "prod"
+
+# Database password (used for Aurora Serverless v2)
+db_password = "REPLACE_WITH_SECURE_PASSWORD"
+
+# SSH key for EC2 access (must be created in AWS first)
+ssh_key_name = "your-key-name"
+
+# Optional: Specify a static IPv6 address (must be within your subnet's CIDR)
+# After first deploy, you can get the assigned IPv6 and use it for subsequent deploys:
+# static_ipv6_address = "2001:db8:1234:1a2b::123"

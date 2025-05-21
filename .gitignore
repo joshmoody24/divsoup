@@ -35,5 +35,9 @@ erl_crash.dump
 /iac/*.tfstate
 /iac/*.tfstate.backup
 /iac/.terraform.lock.hcl
+/iac/*.tfvars
+/iac/terraform.tfvars.json
+/iac/.terraformrc
+/iac/terraform.rc
 
 **/.claude/settings.local.json
