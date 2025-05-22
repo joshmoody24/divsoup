@@ -73,3 +73,15 @@ variable "static_ipv6_address" {
   type        = string
   default     = ""  # If empty, an address will be automatically assigned
 }
+
+variable "domain_name" {
+  description = "Domain name for the website"
+  type        = string
+  default     = "divsoup.net"
+}
+
+variable "letsencrypt_email" {
+  description = "Email address for Let's Encrypt notifications"
+  type        = string
+  default     = ""
+}

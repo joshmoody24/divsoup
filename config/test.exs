@@ -8,7 +8,8 @@ import Config
 config :divsoup, Divsoup.Repo,
   database: Path.expand("../divsoup_test.db", __DIR__),
   pool_size: 5,
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  adapter: Ecto.Adapters.SQLite3
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

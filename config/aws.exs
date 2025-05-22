@@ -5,6 +5,7 @@ aws_region = System.get_env("AWS_REGION", "us-west-1")
 s3_bucket = System.get_env("S3_BUCKET", "divsoup")
 aws_access_key = System.get_env("AWS_ACCESS_KEY_ID")
 aws_secret_key = System.get_env("AWS_SECRET_ACCESS_KEY")
+mix_env = System.get_env("MIX_ENV", "prod")
 
 config :divsoup,
   aws_region: aws_region,
@@ -17,7 +18,7 @@ config :ex_aws,
   secret_access_key: aws_secret_key
 
 # Log warning if credentials are missing
-if is_nil(aws_access_key) or is_nil(aws_secret_key) do
+if (is_nil(aws_access_key) or is_nil(aws_secret_key)) and mix_env != "prod" do
   IO.puts(:stderr, """
   ⚠️  AWS credentials not found in environment variables!
   Make sure to set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in your environment.

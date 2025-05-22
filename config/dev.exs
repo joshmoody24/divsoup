@@ -2,13 +2,12 @@ import Config
 
 # Configure your database
 config :divsoup, Divsoup.Repo,
-  username: "postgres",
-  password: System.get_env("DB_PASSWORD") || "postgres",
-  hostname: System.get_env("DB_HOST") || "localhost",
-  database: "divsoup_dev",
-  pool_size: 10,
+  database: Path.expand("../divsoup.db", __DIR__),
+  pool_size: 5,
   stacktrace: true,
-  show_sensitive_data_on_connection_error: true
+  show_sensitive_data_on_connection_error: true,
+  pool: Ecto.Adapters.SQL.Sandbox,
+  adapter: Ecto.Adapters.SQLite3
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

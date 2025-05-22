@@ -241,7 +241,7 @@ resource "aws_subnet" "divsoup_public_subnet" {
   vpc_id                          = aws_vpc.divsoup_vpc.id
   cidr_block                      = "10.0.${count.index + 1}.0/24"
   availability_zone               = "${var.aws_region}${count.index == 0 ? "b" : "c"}"
-  map_public_ip_on_launch         = false  # No public IPv4
+  map_public_ip_on_launch         = true
   assign_ipv6_address_on_creation = true  # Assign IPv6 addresses automatically
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.divsoup_vpc.ipv6_cidr_block, 8, count.index)
 
@@ -279,6 +279,12 @@ resource "aws_internet_gateway" "divsoup_igw" {
 # Create route table for public subnets
 resource "aws_route_table" "divsoup_public_rt" {
   vpc_id = aws_vpc.divsoup_vpc.id
+
+  # IPv4 default route
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.divsoup_igw.id
+  }
 
   # IPv6 route
   route {
@@ -408,9 +414,23 @@ resource "aws_ssm_parameter" "db_name" {
   }
 }
 
+resource "aws_eip" "app_ip" {
+  instance = aws_instance.divsoup_app.id
+  domain   = "vpc"
+
+  tags = {
+    Name = "divsoup-app-eip"
+  }
+}
+
+output "app_static_ip" {
+  description = "Elastic IP to point your DNS A-record at"
+  value       = aws_eip.app_ip.public_ip
+}
+
 resource "aws_instance" "divsoup_app" {
   ami                         = var.app_ami_id
-  instance_type               = "t4g.nano"
+  instance_type               = "t4g.micro"
   key_name                    = var.ssh_key_name
   iam_instance_profile        = aws_iam_instance_profile.divsoup_app_profile.name
 
@@ -418,7 +438,7 @@ resource "aws_instance" "divsoup_app" {
   subnet_id                   = aws_subnet.divsoup_public_subnet[0].id
   vpc_security_group_ids      = [aws_security_group.divsoup_app_sg.id]
 
-  associate_public_ip_address = false  # no IPv4
+  associate_public_ip_address = true
   ipv6_address_count          = 1      # auto-assign one IPv6 :contentReference[oaicite:2]{index=2}
 
   root_block_device {
@@ -437,20 +457,13 @@ apt-get update -y
 apt-get install -y git curl unzip build-essential \
 automake autoconf libncurses5-dev libssl-dev \
 zlib1g-dev libssh-dev unixodbc-dev \
-libxml2-dev libxslt1-dev
+libxml2-dev libxslt1-dev nginx chromium-browser \
+certbot python3-certbot-nginx
 
 # 2) Install AWS CLI v2
 curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o /tmp/awscliv2.zip
 unzip /tmp/awscliv2.zip -d /tmp
 /tmp/aws/install
-
-# 3) Override DNS to use nat64.net (DNS64)
-printf '%s\n' \
-'nameserver 2a00:1098:2b::1' \
-'nameserver 2a01:4f8:c2c:123f::1' \
-'nameserver 2a01:4f9:c010:3f02::1' \
-'options timeout:1 attempts:3' \
-> /etc/resolv.conf
 
 # 4) Switch to the 'ubuntu' user for runtime setup
 sudo -iu ubuntu bash <<'UBUNTU_EOF'
@@ -479,21 +492,28 @@ export DB_HOST=$(aws ssm get-parameter --name "/divsoup/db/host" --region "$REGI
 export DB_PORT=$(aws ssm get-parameter --name "/divsoup/db/port" --region "$REGION" --query "Parameter.Value" --output text)
 export DB_NAME=$(aws ssm get-parameter --name "/divsoup/db/name" --region "$REGION" --query "Parameter.Value" --output text)
 
+SECRET_KEY_BASE=$(openssl rand -hex 64)
+
 # f) Write environment file as root
 sudo tee /etc/divsoup.env > /dev/null <<ENVFILE
-export MIX_ENV=prod
-export PHX_SERVER=true
-export PORT=80
-export DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
-export SECRET_KEY_BASE=$(mix phx.gen.secret)
+MIX_ENV=prod
+PHX_SERVER=true
+PORT=4000
+DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
+SECRET_KEY_BASE=$SECRET_KEY_BASE
 ENVFILE
 
+export MIX_ENV=prod
+
 # g) Build Phoenix app
-mix local.hex --force
-mix local.rebar --force
-mix deps.get --only prod
+set +e
+mix local.hex --force || true
+echo "finished installing hex"
+# mix deps.get --only prod
+mix deps.get
 mix compile
 mix phx.digest
+set -e
 
 # h) Verify installation
 elixir --version
@@ -511,12 +531,52 @@ Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/divsoup
 EnvironmentFile=/etc/divsoup.env
-ExecStart=/usr/local/bin/mix phx.server
+
+# ensure mix lives on PATH and runs in prod
+ExecStartPre=/bin/bash -lc 'export PATH=/usr/local/bin:$PATH \
+  && cd /home/ubuntu/divsoup \
+  && MIX_ENV=prod mix deps.get --only prod \
+  && MIX_ENV=prod mix compile \
+  && MIX_ENV=prod mix phx.digest'
+
+ExecStart=/bin/bash -lc 'export PATH=/usr/local/bin:$PATH \
+  && cd /home/ubuntu/divsoup \
+  && MIX_ENV=prod mix phx.server'
+
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 SERVICE
+
+# 6) Create nginx site & reload
+cat > /etc/nginx/sites-available/divsoup <<NGINX_CONF
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+NGINX_CONF
+
+# enable the site
+ln -sf /etc/nginx/sites-available/divsoup /etc/nginx/sites-enabled/divsoup
+rm -f /etc/nginx/sites-enabled/default
+nginx -t
+systemctl reload nginx
+certbot --nginx \
+  --non-interactive \
+  --agree-tos \
+  --redirect \
+  --email "${var.letsencrypt_email}" \
+  -d "${var.domain_name}"
 
 systemctl daemon-reload
 systemctl enable divsoup
@@ -537,27 +597,30 @@ resource "aws_security_group" "divsoup_app_sg" {
   description = "Security group for DivSoup application"
   vpc_id      = aws_vpc.divsoup_vpc.id
   
-  # HTTP IPv6
+  # HTTP
   ingress {
     from_port        = 80
     to_port          = 80
     protocol         = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
   
-  # HTTPS IPv6
+  # HTTPS
   ingress {
     from_port        = 443
     to_port          = 443
     protocol         = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
   
-  # SSH IPv6
+  # SSH
   ingress {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
+    cidr_blocks     = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
   
@@ -566,6 +629,7 @@ resource "aws_security_group" "divsoup_app_sg" {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
   
