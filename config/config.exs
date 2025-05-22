@@ -52,5 +52,4 @@ import_config "aws.exs"
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
 
-# without this, migrations look at sqlite
-import_config "runtime.exs"
+# Note: runtime.exs is loaded automatically at runtime, not during compilation

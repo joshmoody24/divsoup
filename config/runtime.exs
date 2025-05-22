@@ -6,21 +6,25 @@ import Config
 # and secrets from environment variables or elsewhere. Do not define
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
+
 if config_env() == :prod do
   # Load all ENV variables to debug what's being set
   require Logger
-  
+
   # Get the DB adapter and log it
-  db_adapter = System.get_env("DB_ADAPTER", "postgres")  # Default to postgres if not set
+  # Default to postgres if not set
+  db_adapter = System.get_env("DB_ADAPTER", "postgres")
   Logger.info("DB Adapter from ENV: '#{db_adapter}'")
   Logger.info("MIX_ENV: #{System.get_env("MIX_ENV")}")
   Logger.info("DATABASE_URL: #{System.get_env("DATABASE_URL", "not set")}")
-  
+
   # Configure database based on adapter - use if/else instead of case
   if db_adapter == "sqlite" do
     # Log a warning about using SQLite in production
-    Logger.warning("Using SQLite in production mode. This is not recommended for performance reasons.")
-    
+    Logger.warning(
+      "Using SQLite in production mode. This is not recommended for performance reasons."
+    )
+
     database_path =
       System.get_env("DATABASE_PATH") ||
         raise """
@@ -31,18 +35,19 @@ if config_env() == :prod do
     config :divsoup, Divsoup.Repo,
       database: database_path,
       pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5"),
-      adapter: Ecto.Adapters.SQLite3  # Explicitly set adapter
+      # Explicitly set adapter
+      adapter: Ecto.Adapters.SQLite3
   else
     # PostgreSQL Aurora Serverless v2 configuration
     Logger.info("Using PostgreSQL in production mode")
-    
+
     database_url =
       System.get_env("DATABASE_URL") ||
         raise """
         environment variable DATABASE_URL is missing.
         For example: postgres://USER:PASS@HOST/DATABASE
         """
-    
+
     # Parse connection params
     maybe_ipv6 = if System.get_env("ECTO_IPV6"), do: [:inet6], else: []
 
@@ -50,7 +55,8 @@ if config_env() == :prod do
       url: database_url,
       pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
       socket_options: maybe_ipv6,
-      adapter: Ecto.Adapters.Postgres  # Explicitly set adapter
+      # Explicitly set adapter
+      adapter: Ecto.Adapters.Postgres
   end
 
   import Config
