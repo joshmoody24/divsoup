@@ -553,7 +553,11 @@ SERVICE
 cat > /etc/nginx/sites-available/divsoup <<NGINX_CONF
 server {
     listen 80;
-    server_name _;
+    server_name divsoup.net;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:4000;
