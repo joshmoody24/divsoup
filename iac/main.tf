@@ -535,6 +535,8 @@ After=network.target
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/divsoup
+
+# Load environment variables from file
 EnvironmentFile=/etc/divsoup.env
 
 # ensure mix lives on PATH and runs in prod
@@ -544,8 +546,11 @@ ExecStartPre=/bin/bash -lc 'export PATH=/usr/local/bin:$PATH \
   && MIX_ENV=prod mix compile \
   && MIX_ENV=prod mix phx.digest'
 
-ExecStart=/bin/bash -lc 'export PATH=/usr/local/bin:$PATH \
+# Use EnvironmentFile variables in ExecStart
+ExecStart=/bin/bash -lc 'set -a && source /etc/divsoup.env && set +a \
+  && export PATH=/usr/local/bin:$PATH \
   && cd /home/ubuntu/divsoup \
+  && printenv | grep -E "DB_|MIX_ENV|PORT" \
   && MIX_ENV=prod mix phx.server'
 
 Restart=on-failure

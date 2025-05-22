@@ -7,12 +7,18 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  db_adapter = System.get_env("DB_ADAPTER", "postgres")  # Default to postgres if not set
+  # Load all ENV variables to debug what's being set
+  require Logger
   
-  # Configure database based on adapter
+  # Get the DB adapter and log it
+  db_adapter = System.get_env("DB_ADAPTER", "postgres")  # Default to postgres if not set
+  Logger.info("DB Adapter from ENV: '#{db_adapter}'")
+  Logger.info("MIX_ENV: #{System.get_env("MIX_ENV")}")
+  Logger.info("DATABASE_URL: #{System.get_env("DATABASE_URL", "not set")}")
+  
+  # Configure database based on adapter - use if/else instead of case
   if db_adapter == "sqlite" do
     # Log a warning about using SQLite in production
-    require Logger
     Logger.warning("Using SQLite in production mode. This is not recommended for performance reasons.")
     
     database_path =
@@ -28,6 +34,8 @@ if config_env() == :prod do
       adapter: Ecto.Adapters.SQLite3  # Explicitly set adapter
   else
     # PostgreSQL Aurora Serverless v2 configuration
+    Logger.info("Using PostgreSQL in production mode")
+    
     database_url =
       System.get_env("DATABASE_URL") ||
         raise """

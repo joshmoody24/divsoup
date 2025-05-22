@@ -126,23 +126,31 @@ defmodule Divsoup.Analyzer.S3Storage do
               ]
             )
 
-          # Execute request with proper AWS configuration  
-          # Get credentials directly from environment
-          access_key_id = System.get_env("AWS_ACCESS_KEY_ID")
-          secret_access_key = System.get_env("AWS_SECRET_ACCESS_KEY")
+          # Execute request with proper AWS configuration
+          mix_env = System.get_env("MIX_ENV", "dev")
+          
+          # In production, use instance metadata through ExAws defaults
+          # In development, try to use environment variables
+          result = if mix_env == "prod" do
+            Logger.info("Running in production, using instance profile credentials")
+            operation |> ExAws.request(region: region)
+          else
+            # Get credentials directly from environment for development
+            access_key_id = System.get_env("AWS_ACCESS_KEY_ID")
+            secret_access_key = System.get_env("AWS_SECRET_ACCESS_KEY")
 
-          # Log warning if credentials are missing
-          if is_nil(access_key_id) or is_nil(secret_access_key) do
-            Logger.warning("AWS credentials not found in environment variables!")
-          end
+            # Log warning if credentials are missing
+            if is_nil(access_key_id) or is_nil(secret_access_key) do
+              Logger.warning("AWS credentials not found in environment variables!")
+            end
 
-          result =
             operation
             |> ExAws.request(
               region: region,
               access_key_id: access_key_id,
               secret_access_key: secret_access_key
             )
+          end
 
           case result do
             {:ok, _response} ->

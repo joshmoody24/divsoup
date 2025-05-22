@@ -104,7 +104,7 @@ defmodule Divsoup.Analyzer.Browser do
         
       File.stat!(html_path).size == 0 ->
         error_log = if File.exists?(error_log_path), do: File.read!(error_log_path), else: "No error log available"
-        {:error, "HTML file is empty. Chrome error: #{String.slice(error_log, 0, 200)}..."}
+        {:error, "HTML file is empty. Chrome error: #{String.slice(error_log, 0, 2000)}..."}
         
       not File.exists?(screenshot_path) ->
         {:error, "Screenshot was not created"}
