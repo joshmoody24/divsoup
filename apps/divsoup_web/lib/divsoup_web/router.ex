@@ -19,6 +19,7 @@ defmodule DivsoupWeb.Router do
 
     get "/", PageController, :home
     get "/about", PageController, :about
+    get "/achievements", PageController, :list_achievements
     post "/request-analysis", PageController, :request_analysis
     
     # Job routes

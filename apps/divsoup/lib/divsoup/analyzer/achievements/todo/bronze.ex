@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.TodoBronze do
       hierarchy: :bronze,
       title: "Unfinished Business",
       group: "htmx",
-      description: "Page contains the phrase \"TODO\""
+      description: "Page contains the phrase <code>TODO</code>"
     }
   end
 end

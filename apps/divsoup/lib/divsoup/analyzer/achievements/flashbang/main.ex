@@ -37,7 +37,7 @@ defmodule Divsoup.Achievement.Flashbang do
       hierarchy: nil,
       title: "Flashbang",
       group: "flashbang",
-      description: "The primary background color is light when the user prefers dark mode"
+      description: "The primary background color is <strong>light</strong> when the user prefers <strong>dark mode</strong>"
     }
   end
 end

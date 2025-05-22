@@ -25,7 +25,7 @@ defmodule Divsoup.Achievement.TooMeta do
       hierarchy: nil,
       title: "Too Meta",
       group: "too_meta",
-      description: "Page head includes 8+ <meta> elements"
+      description: "Page <code>&lt;head&gt;</code> includes <strong>8+</strong> <code>&lt;meta&gt;</code> elements"
     }
   end
 end

@@ -26,7 +26,7 @@ defmodule Divsoup.Achievement.SemanticSnobGold do
       hierarchy: :gold,
       title: "Semantic Snob",
       group: "semantic_snob",
-      description: "Page uses each of the following elements: <header>, <nav>, <main>, <article>, <section>, <aside>, <footer>"
+      description: "Page uses each of the following elements: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>"
     }
   end
 end

@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.SmallData do
       hierarchy: nil,
       title: "Small Data",
       group: "small_data",
-      description: "Page uses JSON-LD or Microdata"
+      description: "Page uses <code>JSON-LD</code> or <code>Microdata</code>"
     }
   end
   

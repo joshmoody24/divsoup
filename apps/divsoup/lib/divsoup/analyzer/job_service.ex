@@ -7,6 +7,39 @@ defmodule Divsoup.Analyzer.JobService do
   alias Divsoup.Analyzer.{Job, JobQueue}
   alias Divsoup.AchievementList
   require Logger
+  
+  # Cache for job metrics (achievements)
+  @job_cache_ttl 900 # 15 minutes in seconds
+  @cache_table :job_metrics_cache
+
+  # Initialize the cache table when the module is loaded
+  def init_cache do
+    :ets.new(@cache_table, [:set, :public, :named_table])
+    :ok
+  end
+
+  # Helper to get from cache
+  defp get_from_cache(key) do
+    case :ets.lookup(@cache_table, key) do
+      [{^key, value, timestamp}] ->
+        now = System.system_time(:second)
+        if now - timestamp < @job_cache_ttl do
+          {:ok, value}
+        else
+          # Cache entry expired, remove it
+          :ets.delete(@cache_table, key)
+          :not_found
+        end
+      [] -> :not_found
+    end
+  end
+
+  # Helper to store in cache
+  defp store_in_cache(key, value) do
+    timestamp = System.system_time(:second)
+    :ets.insert(@cache_table, {key, value, timestamp})
+    :ok
+  end
 
   @doc """
   Creates a new analysis job and enqueues it for processing.
@@ -52,35 +85,49 @@ defmodule Divsoup.Analyzer.JobService do
   def get_job_with_metrics(job_id) do
     case get_job(job_id) do
       {:ok, job} ->
-        case job.html_url do
-          url when is_binary(url) ->
-            with {:ok, 200, _headers, ref} = :hackney.get(url),
-                 {:ok, body} = :hackney.body(ref),
-                 {:ok, parsed_html} = Floki.parse_document(body) do
-              Logger.info("Parsed HTML successfully")
+        # Try to get results from cache first
+        cache_key = "job_metrics:#{job_id}"
+        case get_from_cache(cache_key) do
+          {:ok, cached_results} ->
+            Logger.info("Using cached results for job #{job_id}")
+            {:ok, cached_results}
+          
+          :not_found ->
+            # Cache miss, fetch and process data
+            case job.html_url do
+              url when is_binary(url) ->
+                with {:ok, 200, _headers, ref} = :hackney.get(url),
+                     {:ok, body} = :hackney.body(ref),
+                     {:ok, parsed_html} = Floki.parse_document(body) do
+                  Logger.info("Parsed HTML successfully for job #{job_id}")
 
-              achievements =
-                AchievementList.all()
-                |> Enum.map(fn achievement ->
-                  Logger.debug("Evaluating achievement: #{inspect(achievement)}")
+                  achievements =
+                    AchievementList.all()
+                    |> Enum.map(fn achievement ->
+                      %{
+                        achievement: achievement.achievement(),
+                        fulfills_criteria: Enum.empty?(achievement.evaluate(parsed_html, body))
+                      }
+                    end)
+                    |> Enum.filter(fn result -> result.fulfills_criteria end)
+                    |> Enum.map(fn result -> result.achievement end)
 
-                  %{
-                    achievement: achievement.achievement(),
-                    fulfills_criteria: Enum.empty?(achievement.evaluate(parsed_html, body))
+                  results = %{
+                    job: job,
+                    achievements: achievements
                   }
-                end)
-                |> Enum.filter(fn result -> result.fulfills_criteria end)
-                |> Enum.map(fn result -> result.achievement end)
+                  
+                  # Store in cache for future requests
+                  store_in_cache(cache_key, results)
+                  
+                  {:ok, results}
+                end
 
-              {:ok,
-               %{
-                 job: job,
-                 achievements: achievements
-               }}
+              nil ->
+                results = %{job: job, achievements: []}
+                store_in_cache(cache_key, results)
+                {:ok, results}
             end
-
-          nil ->
-            {:ok, %{job: job, achievements: []}}
         end
 
       error ->
@@ -121,6 +168,9 @@ defmodule Divsoup.Analyzer.JobService do
         # Ensure started_at is set if not already
         started_at = if is_nil(job.started_at), do: DateTime.utc_now(), else: job.started_at
 
+        # Invalidate cache for this job if it exists
+        :ets.delete(@cache_table, "job_metrics:#{id}")
+
         job
         |> Job.changeset(%{
           started_at: started_at,
@@ -147,6 +197,9 @@ defmodule Divsoup.Analyzer.JobService do
         # Ensure started_at is set if not already
         started_at = if is_nil(job.started_at), do: DateTime.utc_now(), else: job.started_at
 
+        # Invalidate cache for this job if it exists
+        :ets.delete(@cache_table, "job_metrics:#{id}")
+        
         job
         |> Job.changeset(%{
           started_at: started_at,

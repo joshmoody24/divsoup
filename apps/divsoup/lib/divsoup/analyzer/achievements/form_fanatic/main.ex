@@ -59,7 +59,7 @@ defmodule Divsoup.Achievement.FormFanatic do
       hierarchy: nil,
       title: "Form Fanatic",
       group: "form_fanatic",
-      description: "Page has a <form> containing #{@required_input_types} or more different input types"
+      description: "Page has a <code>&lt;form&gt;</code> containing <strong>#{@required_input_types}</strong> or more different input types"
     }
   end
 end

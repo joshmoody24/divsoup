@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.SoapBox do
       hierarchy: nil,
       title: "Soap Box",
       group: "soap_box",
-      description: "Page contains an HTML comment with more than 100 words"
+      description: "Page contains an HTML <code>&lt;!-- comment --&gt;</code> with more than <strong>100</strong> words"
     }
   end
   

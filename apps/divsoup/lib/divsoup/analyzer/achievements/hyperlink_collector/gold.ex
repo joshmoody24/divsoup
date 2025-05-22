@@ -25,7 +25,7 @@ defmodule Divsoup.Achievement.HyperlinkCollectorGold do
       hierarchy: :gold,
       title: "Hyperlink Curator",
       group: "hyperlink_collector",
-      description: "Page links to at least #{@min_domains} different external domains"
+      description: "Page links to at least <strong>#{@min_domains}</strong> different external domains"
     }
   end
 end

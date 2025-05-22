@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.AsciiArt do
       hierarchy: nil,
       title: "ASCII Art",
       group: "ascii_art",
-      description: "Page contains an ASCII art HTML comment"
+      description: "Page contains an <code>ASCII art</code> HTML <code>&lt;!-- comment --&gt;</code>"
     }
   end
   

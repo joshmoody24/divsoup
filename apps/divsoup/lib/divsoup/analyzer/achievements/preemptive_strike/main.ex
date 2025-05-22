@@ -33,7 +33,7 @@ defmodule Divsoup.Achievement.PreemptiveStrike do
       hierarchy: nil,
       title: "Preemptive Strike",
       group: "preemptive_strike",
-      description: "Page includes a <link rel=\"preload\">, <link rel=\"dns-prefetch\">, or <link rel=\"preconnect\">"
+      description: "Page includes a <code>&lt;link rel=\"preload\"&gt;</code>, <code>&lt;link rel=\"dns-prefetch\"&gt;</code>, or <code>&lt;link rel=\"preconnect\"&gt;</code>"
     }
   end
 end

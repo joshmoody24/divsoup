@@ -35,7 +35,7 @@ defmodule Divsoup.Achievement.Progressive do
       hierarchy: nil,
       title: "Progressive",
       group: "progressive",
-      description: "Page contains both a <progress> and <meter> element"
+      description: "Page contains both a <code>&lt;progress&gt;</code> and <code>&lt;meter&gt;</code> element"
     }
   end
 end

@@ -32,7 +32,7 @@ defmodule Divsoup.Achievement.MillionthVisitor do
       hierarchy: nil,
       title: "Millionth Visitor!!!",
       group: "millionth_visitor",
-      description: "Page uses a <blink> or <marquee> element"
+      description: "Page uses a <code>&lt;blink&gt;</code> or <code>&lt;marquee&gt;</code> element"
     }
   end
 end

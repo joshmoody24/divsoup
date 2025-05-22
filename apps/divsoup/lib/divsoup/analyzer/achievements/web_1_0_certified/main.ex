@@ -27,7 +27,7 @@ defmodule Divsoup.Achievement.Web10Certified do
       hierarchy: nil,
       title: "Web 1.0 Certified",
       group: "web_1_0_certified",
-      description: "Page is authored in HTML 3.2"
+      description: "Page is authored in <strong>HTML 3.2</strong>"
     }
   end
 end

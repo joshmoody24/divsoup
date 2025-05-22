@@ -24,7 +24,7 @@ defmodule Divsoup.Achievement.Bootstrap do
       hierarchy: nil,
       title: "Not like the other girls",
       group: "bootstrap",
-      description: "Page links to Bootstrap CSS or JS"
+      description: "Page links to <a href=\"https://getbootstrap.com/\" target=\"_blank\">Bootstrap</a> CSS or JS"
     }
   end
 end

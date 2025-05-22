@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.DivSoupPlatinum do
       hierarchy: :platinum,
       title: "Div Casserole",
       group: "div_soup",
-      description: "More than 90% of the HTML elements in the page are divs"
+      description: "More than <strong>90%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code>s"
     }
   end
 end

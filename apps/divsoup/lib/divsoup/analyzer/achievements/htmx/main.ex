@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.Htmx do
       hierarchy: nil,
       title: "HTMX Simp",
       group: "htmx",
-      description: "Page contains a reference to HTMX"
+      description: "Page contains a reference to <a href=\"https://htmx.org\" target=\"_blank\">HTMX</a>"
     }
   end
 end

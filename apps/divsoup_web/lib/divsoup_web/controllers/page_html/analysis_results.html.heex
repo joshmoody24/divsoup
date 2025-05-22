@@ -42,7 +42,7 @@
           <div class="terminal-card">
             <header>{achievement.title}</header>
             <div>
-              {achievement.description}
+              <%= raw(achievement.description) %>
             </div>
           </div>
         <% end %>

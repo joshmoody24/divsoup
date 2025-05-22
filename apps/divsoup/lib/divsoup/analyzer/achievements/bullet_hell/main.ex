@@ -58,7 +58,7 @@ defmodule Divsoup.Achievement.BulletHell do
       hierarchy: nil,
       title: "Bullet Hell",
       group: "bullet_hell",
-      description: "Page uses unicode bullet points to create a list instead of using <ul>"
+      description: "Page uses unicode bullet points (• ◆ ★) to create a list instead of using <code>&lt;ul&gt;</code>"
     }
   end
 end

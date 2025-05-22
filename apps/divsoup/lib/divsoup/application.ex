@@ -7,6 +7,9 @@ defmodule Divsoup.Application do
 
   @impl true
   def start(_type, _args) do
+    # Initialize the job metrics cache
+    Divsoup.Analyzer.JobService.init_cache()
+    
     children = [
       Divsoup.Repo,
       {Ecto.Migrator,

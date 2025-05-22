@@ -30,7 +30,7 @@ defmodule Divsoup.Achievement.VoidElements.CloseMinded do
       hierarchy: :gold,
       title: "Close-minded",
       group: "void_elements",
-      description: "All void elements include a trailing slash"
+      description: "All void elements include a trailing slash (<code>&lt;img /&gt;</code>)"
     }
   end
 end

@@ -61,7 +61,7 @@ defmodule Divsoup.Achievement.YoutubeJunkie do
       hierarchy: nil,
       title: "YouTube Junkie",
       group: "youtube_junkie",
-      description: "Page embeds #{@required_embeds} or more YouTube videos"
+      description: "Page embeds <strong>#{@required_embeds}</strong> or more <a href=\"https://youtube.com\" target=\"_blank\">YouTube</a> videos"
     }
   end
 end

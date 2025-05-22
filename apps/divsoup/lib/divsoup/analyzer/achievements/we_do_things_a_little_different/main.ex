@@ -27,7 +27,7 @@ defmodule Divsoup.Achievement.WeDoThingsALittleDifferent do
       hierarchy: nil,
       title: "We Do Things a Little Different Around Here",
       group: "we_do_things_a_little_different",
-      description: "Nest a <div> inside a <span>"
+      description: "Nest a <code>&lt;div&gt;</code> inside a <code>&lt;span&gt;</code>"
     }
   end
 end

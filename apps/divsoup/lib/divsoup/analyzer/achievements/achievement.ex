@@ -7,7 +7,7 @@ defmodule Divsoup.Achievement do
   @type t() :: %__MODULE__{
           title: String.t(),
           group: String.t(),
-          description: String.t(),
+          description: String.t(), # Can contain HTML markup
           hierarchy: hierarchy()
         }
 end

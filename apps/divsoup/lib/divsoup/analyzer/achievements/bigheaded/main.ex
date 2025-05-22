@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.Bigheaded do
       hierarchy: nil,
       title: "Bigheaded",
       group: "bigheaded",
-      description: "Page head contains 25 or more elements"
+      description: "Page <code>&lt;head&gt;</code> contains <strong>25</strong> or more elements"
     }
   end
   

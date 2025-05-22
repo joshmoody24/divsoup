@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.DivSoupBronze do
       hierarchy: :bronze,
       title: "Div Broth",
       group: "div_soup",
-      description: "More than 25% of the HTML elements in the page are divs"
+      description: "More than <strong>25%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements"
     }
   end
 end
