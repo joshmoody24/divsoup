@@ -29,7 +29,7 @@ defmodule Divsoup.Achievement.VoidElements.OpenMinded do
   @impl true
   def achievement do
     %Achievement{
-      hierarchy: :gold,
+      hierarchy: nil,
       title: "Open-minded",
       group: "void_elements",
       description: "No void elements include a trailing slash (<code>&lt;img&gt;</code>)"

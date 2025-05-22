@@ -457,7 +457,7 @@ apt-get update -y
 apt-get install -y git curl unzip build-essential \
 automake autoconf libncurses5-dev libssl-dev \
 zlib1g-dev libssh-dev unixodbc-dev \
-libxml2-dev libxslt1-dev nginx chromium-browser \
+libxml2-dev libxslt1-dev nginx chromium-browser xdg-utils \
 certbot python3-certbot-nginx
 
 # 2) Install AWS CLI v2
@@ -499,8 +499,10 @@ sudo tee /etc/divsoup.env > /dev/null <<ENVFILE
 MIX_ENV=prod
 PHX_SERVER=true
 PORT=4000
+DB_ADAPTER=postgres
 DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
 SECRET_KEY_BASE=$SECRET_KEY_BASE
+DIVSOUP_OUTPUT_DIR=/home/ubuntu/divsoup_files
 ENVFILE
 
 export MIX_ENV=prod
@@ -518,6 +520,9 @@ set -e
 # h) Verify installation
 elixir --version
 erl -noshell -eval 'io:format("OK~n"), init:stop()'
+
+# set up chrome screenshot location
+mkdir -p ~/divsoup_files
 UBUNTU_EOF
 
 # 5) Create & enable systemd service

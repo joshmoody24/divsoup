@@ -65,12 +65,12 @@ defmodule DivsoupWeb.PageController do
     case JobService.create_job(url) do
       {:ok, job} ->
         conn
-        |> put_flash(:info, "Analysis job created and scheduled for #{url}")
-        |> redirect(to: ~p"/job/#{job.id}")
+        |> put_flash(:info, "Analysis created and scheduled for #{url}")
+        |> redirect(to: ~p"/analysis/#{job.id}")
 
       {:error, reason} ->
         conn
-        |> put_flash(:error, "Failed to create analysis job: #{inspect(reason)}")
+        |> put_flash(:error, "Failed to create analysis: #{inspect(reason)}")
         |> redirect(to: ~p"/")
     end
   end
@@ -81,13 +81,21 @@ defmodule DivsoupWeb.PageController do
 
     case JobService.get_job_with_metrics(job_id) do
       {:ok, results} ->
+        # Sort achievements by hierarchy level (platinum first)
+        sorted_achievements = 
+          results.achievements
+          |> Enum.sort_by(fn achievement -> 
+            # Reverse the order so platinum (4) is first
+            -achievement_level_to_number(achievement.hierarchy)
+          end)
+        
         conn
         |> assign(:title, "Analysis")
-        |> render(:analysis_results, jobs: [results.job], achievements: results.achievements)
+        |> render(:analysis_results, jobs: [results.job], achievements: sorted_achievements)
 
       {:error, reason} ->
         conn
-        |> put_flash(:error, "Job not found: #{reason}")
+        |> put_flash(:error, "Analysis not found: #{reason}")
         |> redirect(to: ~p"/")
     end
   end
@@ -117,9 +125,33 @@ defmodule DivsoupWeb.PageController do
       |> put_flash(:info, "No completed analysis found for #{url}. Try running a new analysis.")
       |> redirect(to: ~p"/")
     else
+      # We need to fetch metrics for each job since they don't come with achievements
+      jobs_with_achievements = 
+        Enum.map(jobs, fn job ->
+          case JobService.get_job_with_metrics(job.id) do
+            {:ok, results} -> 
+              # Sort achievements by hierarchy
+              sorted_achievements = 
+                results.achievements
+                |> Enum.sort_by(fn achievement -> 
+                  -achievement_level_to_number(achievement.hierarchy)
+                end)
+              
+              {results.job, sorted_achievements}
+            
+            _ -> {job, []}
+          end
+        end)
+      
+      # Unzip the jobs and achievements
+      {jobs_list, achievements_list} = Enum.unzip(jobs_with_achievements)
+      
+      # Use the first job's achievements if any are available
+      achievements = List.first(achievements_list, [])
+      
       conn
       |> assign(:title, "Analysis")
-      |> render(:analysis_results, jobs: jobs)
+      |> render(:analysis_results, jobs: jobs_list, achievements: achievements)
     end
   end
 end

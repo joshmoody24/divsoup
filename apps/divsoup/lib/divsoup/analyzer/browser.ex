@@ -5,6 +5,9 @@ defmodule Divsoup.Analyzer.Browser do
   
   require Logger
   
+  # Default output directory is /tmp/divsoup_analysis
+  @default_output_dir "/tmp/divsoup_analysis"
+  
   @doc """
   Captures a website's rendered HTML using Chrome's headless mode.
   
@@ -16,6 +19,10 @@ defmodule Divsoup.Analyzer.Browser do
   
     * `{:ok, result}` - Map containing url, timestamp, and path to saved HTML
     * `{:error, reason}` - Error message if capture fails
+  
+  ## Environment Variables
+  
+    * `DIVSOUP_OUTPUT_DIR` - Override the default output directory
   """
   def analyze_website(url) do
     Logger.info("Analyzing website: #{url}")
@@ -26,8 +33,11 @@ defmodule Divsoup.Analyzer.Browser do
       domain = url |> URI.parse() |> Map.get(:host, "unknown") |> String.replace(~r/[^\w]/, "_")
       filename = "#{domain}_#{System.system_time(:second)}.html"
       
-      # Prepare directories
-      output_dir = "/tmp/divsoup_analysis"
+      # Get output directory from environment variable or use default
+      output_dir = System.get_env("DIVSOUP_OUTPUT_DIR", @default_output_dir)
+      Logger.debug("Using output directory: #{output_dir}")
+      
+      # Create the output directory if it doesn't exist
       File.mkdir_p!(output_dir)
       file_path = Path.join(output_dir, filename)
       
@@ -72,22 +82,28 @@ defmodule Divsoup.Analyzer.Browser do
     screenshot_path = "#{base_path}_screenshot.png"
     pdf_path = "#{base_path}_pdf.pdf"
     
+    # Store error log in the same directory as output files
+    error_log_path = "#{base_path}_chrome_error.log"
+    
     # Command to capture HTML, screenshot, and PDF
     "chromium --headless --disable-gpu --no-sandbox " <>
     "--screenshot=#{screenshot_path} " <>
     "--print-to-pdf=#{pdf_path} " <>
     "--window-size=1920,1080 " <>
-    "--dump-dom #{url} > #{output_path} 2>/tmp/chrome_error.log"
+    "--dump-dom #{url} > #{output_path} 2>#{error_log_path}"
   end
   
   # Check output files and return appropriate result
   defp check_output(0, html_path, screenshot_path, pdf_path) do
+    # Error log is stored alongside the output files
+    error_log_path = "#{Path.rootname(html_path)}_chrome_error.log"
+    
     cond do
       not File.exists?(html_path) ->
         {:error, "HTML file was not created"}
         
       File.stat!(html_path).size == 0 ->
-        error_log = File.read!("/tmp/chrome_error.log")
+        error_log = if File.exists?(error_log_path), do: File.read!(error_log_path), else: "No error log available"
         {:error, "HTML file is empty. Chrome error: #{String.slice(error_log, 0, 200)}..."}
         
       not File.exists?(screenshot_path) ->

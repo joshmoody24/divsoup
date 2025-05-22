@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.DivSoupGold do
       hierarchy: :gold,
       title: "Div Stew",
       group: "div_soup",
-      description: "More than <strong>75%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code>s"
+      description: "More than <strong>75%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements"
     }
   end
 end

@@ -6,7 +6,7 @@ defmodule Divsoup.Analyzer.S3Storage do
   require Logger
 
   @doc """
-  Uploads analysis files to S3.
+  Uploads analysis files to S3 and optionally deletes local files after upload.
 
   ## Parameters
 
@@ -15,7 +15,9 @@ defmodule Divsoup.Analyzer.S3Storage do
     * `pdf_path` - Path to the PDF file
     * `url` - The URL that was analyzed
     * `timestamp` - Timestamp of the analysis (DateTime)
-    * `opts` - Options (like bucket name)
+    * `opts` - Options:
+      * `:bucket` - S3 bucket name (defaults to env var S3_BUCKET or "divsoup")
+      * `:delete_after_upload` - Whether to delete local files after upload (defaults to true)
 
   ## Returns
 
@@ -24,6 +26,7 @@ defmodule Divsoup.Analyzer.S3Storage do
   """
   def upload_analysis_files(html_path, screenshot_path, pdf_path, url, timestamp, opts \\ []) do
     bucket = Keyword.get(opts, :bucket, System.get_env("S3_BUCKET", "divsoup"))
+    delete_after_upload = Keyword.get(opts, :delete_after_upload, true)
 
     try do
       # Configure AWS
@@ -70,6 +73,15 @@ defmodule Divsoup.Analyzer.S3Storage do
       with {:ok, html_url} <- upload_file(bucket, html_path, html_key, region),
            {:ok, screenshot_url} <- upload_file(bucket, screenshot_path, screenshot_key, region),
            {:ok, pdf_url} <- upload_file(bucket, pdf_path, pdf_key, region) do
+        
+        # Delete local files after successful upload if requested
+        if delete_after_upload do
+          delete_file(html_path)
+          delete_file(screenshot_path)
+          delete_file(pdf_path)
+          Logger.info("Deleted local files after successful S3 upload")
+        end
+        
         # Return S3 URLs
         {:ok,
          %{
@@ -163,6 +175,24 @@ defmodule Divsoup.Analyzer.S3Storage do
       ".jpeg" -> "image/jpeg"
       ".pdf" -> "application/pdf"
       _ -> "application/octet-stream"
+    end
+  end
+  
+  # Safely delete a file, handling errors gracefully
+  defp delete_file(file_path) do
+    try do
+      case File.rm(file_path) do
+        :ok -> 
+          Logger.debug("Successfully deleted file: #{file_path}")
+          :ok
+        {:error, reason} ->
+          Logger.warning("Failed to delete file #{file_path}: #{inspect(reason)}")
+          {:error, reason}
+      end
+    rescue
+      e ->
+        Logger.warning("Error when deleting file #{file_path}: #{Exception.message(e)}")
+        {:error, e}
     end
   end
 end

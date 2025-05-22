@@ -7,10 +7,14 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 if config_env() == :prod do
-  db_adapter = System.get_env("DB_ADAPTER")
+  db_adapter = System.get_env("DB_ADAPTER", "postgres")  # Default to postgres if not set
   
-  # Configure database based on adapter - defaults to Postgres in production
+  # Configure database based on adapter
   if db_adapter == "sqlite" do
+    # Log a warning about using SQLite in production
+    require Logger
+    Logger.warning("Using SQLite in production mode. This is not recommended for performance reasons.")
+    
     database_path =
       System.get_env("DATABASE_PATH") ||
         raise """
@@ -20,7 +24,8 @@ if config_env() == :prod do
 
     config :divsoup, Divsoup.Repo,
       database: database_path,
-      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5"),
+      adapter: Ecto.Adapters.SQLite3  # Explicitly set adapter
   else
     # PostgreSQL Aurora Serverless v2 configuration
     database_url =
@@ -36,7 +41,8 @@ if config_env() == :prod do
     config :divsoup, Divsoup.Repo,
       url: database_url,
       pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-      socket_options: maybe_ipv6
+      socket_options: maybe_ipv6,
+      adapter: Ecto.Adapters.Postgres  # Explicitly set adapter
   end
 
   import Config

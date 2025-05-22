@@ -15,7 +15,7 @@
 
       <%= if Job.status(job) == :completed do %>
         <div class="terminal-card">
-          <header>Job Details</header>
+          <header>Analysis Details</header>
           <div>
             <ul>
               <li>Completed at: {job.finished_at}</li>
@@ -74,7 +74,7 @@
         <% end %>
 
         <div class="terminal-card">
-          <header>Job Details</header>
+          <header>Analysis Details</header>
           <div>
             <ul>
               <li>Job ID: {job.id}</li>

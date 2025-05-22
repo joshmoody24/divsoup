@@ -22,9 +22,9 @@ defmodule DivsoupWeb.Router do
     get "/achievements", PageController, :list_achievements
     post "/request-analysis", PageController, :request_analysis
     
-    # Job routes
-    get "/job/:id", PageController, :view_job
-    get "/jobs/by-url/:url", PageController, :list_jobs_by_url
+    # Analysis routes
+    get "/analysis/by-url/:url", PageController, :list_jobs_by_url
+    get "/analysis/:id", PageController, :view_job
   end
 
   # Other scopes may use custom stacks.
