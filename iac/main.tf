@@ -430,7 +430,7 @@ output "app_static_ip" {
 
 resource "aws_instance" "divsoup_app" {
   ami                         = var.app_ami_id
-  instance_type               = "t4g.micro"
+  instance_type               = "t4g.small"
   key_name                    = var.ssh_key_name
   iam_instance_profile        = aws_iam_instance_profile.divsoup_app_profile.name
 
