@@ -1,15 +1,41 @@
 <link phx-track-static rel="stylesheet" href={~p"/assets/home.css"} />
 <.flash_group flash={@flash} />
-<form method="post" action={~p"/request-analysis"} id="analyze-form">
-  <fieldset>
-    <legend>
-      <h1>Website Analyzer</h1>
-    </legend>
-    <div class="form-group">
-      <label for="url">Website URL</label>
-      <input id="url" name="url" type="url" placeholder="Enter URL" />
+
+<div class="home-container">
+  <div class="home-intro">
+    <h1>divsoup</h1>
+    
+    <p>divsoup analyzes websites and awards achievements based on HTML structure, styling practices, and code quirks. Enter any public URL below to discover what achievements it earns!</p>
+    
+    <div class="features">
+      <div class="feature">
+        <strong>Analyze Markup</strong>
+        <p>We'll examine your HTML structure, semantic choices, and element usage.</p>
+      </div>
+      <div class="feature">
+        <strong>Earn Achievements</strong>
+        <p>From Bronze to Platinum levels across multiple categories - collect them all!</p>
+      </div>
+      <div class="feature">
+        <strong>Capture Evidence</strong>
+        <p>We'll save HTML, screenshots, and PDFs of your site for posterity.</p>
+      </div>
     </div>
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-    <button type="submit" id="submit" class="btn btn-primary" role="button">Analyze site</button>
-  </fieldset>
-</form>
+  </div>
+
+  <form method="post" action={~p"/request-analysis"} id="analyze-form">
+    <fieldset>
+      <legend>Analyze a Website</legend>
+      <div class="form-group">
+        <label for="url">Website URL</label>
+        <input id="url" name="url" type="url" placeholder="https://example.com" />
+      </div>
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+      <button type="submit" id="submit" class="btn btn-primary" role="button">Analyze site</button>
+    </fieldset>
+  </form>
+  
+  <p class="home-cta">
+    Already analyzed a site? Check out the <a href="/achievements">complete achievement list</a> to see what you can earn!
+  </p>
+</div>

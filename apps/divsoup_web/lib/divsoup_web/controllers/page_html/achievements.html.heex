@@ -1,0 +1,28 @@
+<div class="achievements-page">
+  <h1>All Achievements</h1>
+  <p>Below is a list of all possible achievements.</p>
+
+  <div class="achievements-container">
+    <%= for {group, achievements} <- @achievements do %>
+      <section class="achievement-group">
+        <h2><%= format_group_name(group) %></h2>
+        <div class="achievement-cards">
+          <%= for achievement <- achievements do %>
+            <div class="terminal-card">
+              <header class={achievement_class(achievement.hierarchy)}>
+                <%= achievement.title %>
+              </header>
+              <div>
+                <%= raw(achievement.description) %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </section>
+    <% end %>
+  </div>
+
+  <div class="back-link">
+    <a href="/">Back to Home</a>
+  </div>
+</div>

@@ -32,7 +32,7 @@ defmodule Divsoup.Achievement.ClassWarfare do
       hierarchy: nil,
       title: "Class Warfare",
       group: "class_warfare",
-      description: "Page includes an element with more than 50 classes"
+      description: "Page includes an element with more than <strong>50</strong> classes"
     }
   end
 end

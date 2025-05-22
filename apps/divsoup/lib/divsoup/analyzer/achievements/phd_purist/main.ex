@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.PhDPurist do
       hierarchy: nil,
       title: "PhD Purist",
       group: "phd_purist",
-      description: "Use the <math> element for something nontrivial"
+      description: "Use the <code>&lt;math&gt;</code> element for something nontrivial"
     }
   end
   

@@ -154,7 +154,7 @@ code {
 }
 code::after,
 code::before {
-  content: "`";
+  content: "";
   display: inline;
 }
 pre code::after,

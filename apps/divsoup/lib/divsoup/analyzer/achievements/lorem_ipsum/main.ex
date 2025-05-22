@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.LoremIpsum do
       hierarchy: nil,
       title: "Textus Vicarious",
       group: "lorem_ipsum",
-      description: "Pagina locutionem \"lorem ipsum\" continet"
+      description: "<i>Pagina locutionem \"lorem ipsum\" continet</i>" # I recognize the irony of using an <i> tag in this app
     }
   end
 end

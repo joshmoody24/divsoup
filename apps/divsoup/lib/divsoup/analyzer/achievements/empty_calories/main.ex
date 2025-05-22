@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.EmptyCalories do
       hierarchy: nil,
       title: "Empty Calories",
       group: "empty_calories",
-      description: "Page contains 10 or more empty <div> or <span> elements"
+      description: "Page contains <strong>10</strong> or more empty <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code> elements"
     }
   end
 

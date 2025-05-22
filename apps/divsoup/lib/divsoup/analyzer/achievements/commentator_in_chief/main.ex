@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.CommentatorInChief do
       hierarchy: nil,
       title: "Commentator-in-Chief",
       group: "commentator_in_chief",
-      description: "Page has more than 10 <!-- comments -->"
+      description: "Page contains more than <strong>10</strong> <code>&lt;!-- comments --&gt;</code>"
     }
   end
 

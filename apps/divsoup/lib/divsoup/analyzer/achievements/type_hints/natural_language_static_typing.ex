@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.NaturalLanguageStaticTyping do
     %Achievement{
       hierarchy: nil,
       title: "Natural Language Static Typing",
-      group: "natural_language_static_typing",
+      group: "semistatic_types",
       description: "At least one text input (or textarea) has <code>spellcheck=\"true\"</code>"
     }
   end

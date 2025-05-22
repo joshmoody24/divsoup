@@ -23,8 +23,8 @@ defmodule Divsoup.Achievement.TodoSilver do
     %Achievement{
       hierarchy: :silver,
       title: "Fix me, please",
-      group: "htmx",
-      description: "Page contains the phrase \"TODO\" at least 3 times"
+      group: "todo",
+      description: "Page contains the phrase <code>TODO</code> at least <strong>3</strong> times"
     }
   end
 end

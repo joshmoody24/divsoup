@@ -37,8 +37,8 @@ defmodule Divsoup.Achievement.ShallowOcean do
     %Achievement{
       hierarchy: nil,
       title: "Shallow Ocean",
-      group: "shallow_ocean",
-      description: "Average depth of all elements inside <body> is #{@max_avg_depth} or less"
+      group: "tree_shenanigans",
+      description: "Average depth of all elements inside <code>&lt;body&gt</code> is <strong>#{@max_avg_depth}</strong> or less"
     }
   end
 

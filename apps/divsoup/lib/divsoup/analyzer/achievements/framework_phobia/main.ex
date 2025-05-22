@@ -38,7 +38,7 @@ defmodule Divsoup.Achievement.FrameworkPhobia do
       hierarchy: nil,
       title: "Framework Phobia",
       group: "framework_phobia",
-      description: "Page contains a custom element and does not use a JS framework"
+      description: "Page contains a custom HTML element and does not use a JS framework"
     }
   end
 end

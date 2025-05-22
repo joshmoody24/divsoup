@@ -25,7 +25,7 @@ defmodule Divsoup.Achievement.MasterOfElements.Silver do
       hierarchy: :silver,
       title: "Elementary, My Dear Watson",
       group: "master_of_elements",
-      description: "Page uses at least #{@required_elements} different HTML elements"
+      description: "Page uses at least <strong>#{@required_elements}</strong> different HTML elements"
     }
   end
 end

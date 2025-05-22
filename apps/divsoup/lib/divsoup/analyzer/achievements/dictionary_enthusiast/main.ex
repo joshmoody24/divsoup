@@ -35,7 +35,7 @@ defmodule Divsoup.Achievement.DictionaryEnthusiast do
       hierarchy: nil,
       title: "Dictionary Enthusiast",
       group: "dictionary_enthusiast",
-      description: "Page uses definition elements (<dfn> or <dl> with <dt> and <dd>)"
+      description: "Page uses definition elements (<code>&lt;dfn&gt;</code> or <code>&lt;dl&gt;</code> with <code>&lt;dt&gt;</code> and <code>&lt;dd&gt;</code>)"
     }
   end
 end

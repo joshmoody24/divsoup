@@ -30,7 +30,7 @@ defmodule Divsoup.Achievement.TowerOfBabel do
       hierarchy: nil,
       title: "Tower of Babel",
       group: "tower_of_babel",
-      description: "Page contains at least 2 lang attributes with different values"
+      description: "Page contains at least <strong>2</strong> <code>lang</code> attributes with different values"
     }
   end
 end

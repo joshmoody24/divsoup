@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.BackwardsCompatibility do
       hierarchy: nil,
       title: "Backwards Compatibility",
       group: "backwards_compatibility",
-      description: "Page contains an <!--[if IE]>...<![endif]--> comment"
+      description: "Page contains an <code>&lt;!--[if IE]&gt;...&lt;![endif]--&gt;</code> comment"
     }
   end
   

@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.Hydra do
       hierarchy: nil,
       title: "Hydra",
       group: "hydra",
-      description: "Page contains multiple <h1> elements"
+      description: "Page contains multiple <code>&lt;h1&gt;</code> elements"
     }
   end
 end

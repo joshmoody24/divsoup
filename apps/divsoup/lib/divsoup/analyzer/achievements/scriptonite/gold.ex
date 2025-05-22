@@ -49,8 +49,8 @@ defmodule Divsoup.Achievement.ScriptoniteGold do
     %Achievement{
       hierarchy: :gold,
       title: "i use lynx btw",
-      group: "lynx",
-      description: "No <strong>JavaScript</strong>, <strong>CSS</strong>, or <strong>images</strong> appear in the page"
+      group: "the_web_is_for_documents",
+      description: "No JavaScript, CSS, or images appear in the page"
     }
   end
 end

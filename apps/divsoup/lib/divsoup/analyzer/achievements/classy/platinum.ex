@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.ClassyPlatinum do
       hierarchy: :platinum,
       title: "Opulent",
       group: "classy",
-      description: "HTML classes make up more than 50% of the page's size"
+      description: "HTML <code>class</code> attributes make up more than <strong>50%</strong> of the page's size"
     }
   end
 end

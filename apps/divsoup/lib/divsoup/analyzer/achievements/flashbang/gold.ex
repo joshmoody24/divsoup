@@ -34,9 +34,9 @@ defmodule Divsoup.Achievement.Flashbang do
   @impl true
   def achievement do
     %Achievement{
-      hierarchy: nil,
+      hierarchy: :gold,
       title: "Flashbang",
-      group: "flashbang",
+      group: "seared_retinas",
       description: "The primary background color is <strong>light</strong> when the user prefers <strong>dark mode</strong>"
     }
   end

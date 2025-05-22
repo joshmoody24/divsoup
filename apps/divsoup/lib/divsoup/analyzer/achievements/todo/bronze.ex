@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.TodoBronze do
     %Achievement{
       hierarchy: :bronze,
       title: "Unfinished Business",
-      group: "htmx",
+      group: "todo",
       description: "Page contains the phrase <code>TODO</code>"
     }
   end

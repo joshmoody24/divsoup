@@ -23,8 +23,8 @@ defmodule Divsoup.Achievement.TodoGold do
     %Achievement{
       hierarchy: :gold,
       title: "Todoism",
-      group: "htmx",
-      description: "Page contains the phrase \"TODO\" a dozen or more times"
+      group: "todo",
+      description: "Page contains the phrase <code>TODO</code> a <strong>dozen</strong> or more times"
     }
   end
 end

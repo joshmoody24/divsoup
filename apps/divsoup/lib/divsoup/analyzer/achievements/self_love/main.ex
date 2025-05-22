@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.SelfLove do
       hierarchy: nil,
       title: "Self Love",
       group: "self_love",
-      description: "Page contains an <a href=\"#\">"
+      description: "Page contains an <code>&lt;a href=\"#\"&gt;</code> element"
     }
   end
 end

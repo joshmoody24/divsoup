@@ -40,9 +40,9 @@ defmodule Divsoup.Achievement.ChaoticEvil do
   @impl true
   def achievement do
     %Achievement{
-      hierarchy: nil,
+      hierarchy: :platinum,
       title: "Chaotic Evil",
-      group: "chaotic_evil",
+      group: "seared_retinas",
       description: "The primary background color is light when the user prefers dark mode and dark when the user prefers light mode"
     }
   end

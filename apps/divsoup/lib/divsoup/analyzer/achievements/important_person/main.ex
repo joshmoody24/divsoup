@@ -7,7 +7,6 @@ defmodule Divsoup.Achievement.ImportantPerson do
   def evaluate(_html_tree, raw_html) do
     # Count occurrences of !important in the raw HTML
     important_count = count_important_occurrences(raw_html)
-    
     if important_count >= 10 do
       []
     else
@@ -21,7 +20,7 @@ defmodule Divsoup.Achievement.ImportantPerson do
       hierarchy: nil,
       title: "!important person",
       group: "important_person",
-      description: "The phrase \"!important\" appears 10 or more times on the page"
+      description: "The phrase <code>!important</code> appears <strong>10</strong> or more times on the page"
     }
   end
   

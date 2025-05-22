@@ -20,8 +20,8 @@ defmodule Divsoup.Achievement.TypeHints do
     %Achievement{
       hierarchy: nil,
       title: "Type Hints",
-      group: "type_hints",
-      description: "Uses a <datalist>"
+      group: "semistatic_types",
+      description: "Page uses a <code>&lt;datalist&gt;</code> element"
     }
   end
 end

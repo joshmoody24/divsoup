@@ -31,8 +31,8 @@ defmodule Divsoup.Achievement.ScriptoniteSilver do
     %Achievement{
       hierarchy: :silver,
       title: "Scriptonite",
-      group: "scriptonite",
-      description: "No <script> tags or on* attributes appear in the page"
+      group: "the_web_is_for_documents",
+      description: "No <code>&lt;script&gt;</code> tags or <code>on</code> attributes appear in the page"
     }
   end
 end

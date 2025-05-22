@@ -34,7 +34,7 @@ defmodule Divsoup.Achievement.SeoSleazeball do
       hierarchy: nil,
       title: "SEO Sleazeball",
       group: "seo_sleazeball",
-      description: "Page includes Open Graph, Twitter Card, and description meta tags"
+      description: "Page includes Open Graph, Twitter Card, and description <code>&lt;meta&gt;</code> tags"
     }
   end
 end

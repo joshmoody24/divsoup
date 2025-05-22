@@ -47,7 +47,7 @@ defmodule Divsoup.Achievement.CrossPlatform do
       hierarchy: nil,
       title: "Fragmented Ecosystem",
       group: "cross_platform",
-      description: "Page contains browser-specific CSS, e.g., -webkit-, -moz-, -o-, -ms-"
+      description: "Page contains browser-specific CSS, e.g., <code>-webkit-</code>, <code>-moz-</code>, <code>-o-</code>, <code>-ms-</code>"
     }
   end
 end

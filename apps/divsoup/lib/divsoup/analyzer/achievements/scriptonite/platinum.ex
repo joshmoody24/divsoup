@@ -55,7 +55,7 @@ defmodule Divsoup.Achievement.ScriptonitePlatinum do
     %Achievement{
       hierarchy: :platinum,
       title: "Always bet on text",
-      group: "lynx",
+      group: "the_web_is_for_documents",
       description: "Page is entirely plaintext - no CSS, JavaScript, or HTML elements"
     }
   end

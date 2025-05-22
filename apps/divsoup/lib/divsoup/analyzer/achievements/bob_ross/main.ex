@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.BobRoss do
       hierarchy: nil,
       title: "Bob Ross",
       group: "bob_ross",
-      description: "Page includes a <canvas> or <picture> element"
+      description: "Page includes a <code>&lt;canvas&gt;</code> or <code>&lt;picture&gt;</code> element"
     }
   end
 end

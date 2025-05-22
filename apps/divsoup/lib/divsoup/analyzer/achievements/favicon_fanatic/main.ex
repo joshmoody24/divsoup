@@ -25,7 +25,7 @@ defmodule Divsoup.Achievement.FaviconFanatic do
       hierarchy: nil,
       title: "Favicon Fanatic",
       group: "favicon_fanatic",
-      description: "The head has more than 3 <link rel=\"icon\"> elements"
+      description: "The head has more than <strong>3</strong> <code>&lt;link rel=\"icon\"&gt;</code> elements"
     }
   end
 end

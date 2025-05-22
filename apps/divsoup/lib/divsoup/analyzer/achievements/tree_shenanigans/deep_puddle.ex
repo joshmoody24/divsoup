@@ -34,9 +34,9 @@ defmodule Divsoup.Achievement.DeepPuddle do
     %Achievement{
       hierarchy: nil,
       title: "Deep Puddle",
-      group: "deep_puddle",
+      group: "tree_shenanigans",
       description:
-        "The page body contains a descendant chain of at least #{@min_chain_length} elements \
+      "The page body contains a descendant chain of at least <strong>#{@min_chain_length}</strong> elements \
         where each parent has only one child"
     }
   end

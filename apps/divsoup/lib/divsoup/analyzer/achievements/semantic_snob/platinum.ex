@@ -33,8 +33,8 @@ defmodule Divsoup.Achievement.SemanticPsychopathPlatinum do
     %Achievement{
       hierarchy: :platinum,
       title: "Semantic Psychopath",
-      group: "semantic_psychopath",
-      description: "Fulfill the criteria for Semantic Snob and also do not use a single <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code>"
+      group: "semantics",
+      description: "Fulfill the criteria for <strong>Semantic Snob</strong> and also do not use a single <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code>"
     }
   end
 end

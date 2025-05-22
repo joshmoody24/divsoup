@@ -34,7 +34,7 @@ defmodule Divsoup.Achievement.LocalityOfAppearance do
       hierarchy: nil,
       title: "Locality of Appearance",
       group: "locality_of_appearance",
-      description: "Page has more CSS in style attributes than class attributes"
+      description: "Page has more CSS in <code>style</code> attributes than <code>class</code> attributes"
     }
   end
 end

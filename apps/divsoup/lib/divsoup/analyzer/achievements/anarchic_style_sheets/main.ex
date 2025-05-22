@@ -26,7 +26,7 @@ defmodule Divsoup.Achievement.AnarchicStyleSheets do
       hierarchy: nil,
       title: "Anarchic Style Sheets",
       group: "anarchic_style_sheets",
-      description: "Page has #{@required_styles} or more <style> elements scattered within the <body>"
+      description: "Page has <strong>#{@required_styles}</strong> or more <code>&lt;style&gt;</code> elements scattered within the <code>&lt;body&gt;</code>"
     }
   end
 end

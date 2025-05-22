@@ -40,7 +40,9 @@
         <% end %>
         <%= for achievement <- @achievements do %>
           <div class="terminal-card">
-            <header>{achievement.title}</header>
+            <header class={achievement_class(achievement.hierarchy)}>
+              <%= achievement.title %>
+            </header>
             <div>
               <%= raw(achievement.description) %>
             </div>

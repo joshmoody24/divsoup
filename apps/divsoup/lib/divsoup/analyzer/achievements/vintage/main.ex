@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.Vintage do
       hierarchy: nil,
       title: "Vintage",
       group: "vintage",
-      description: "Page uses nested table layouts"
+      description: "Page uses a nested table layout"
     }
   end
 end

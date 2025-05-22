@@ -53,7 +53,7 @@ defmodule Divsoup.Achievement.BlindPersonHater do
       hierarchy: nil,
       title: "Blind Person Hater",
       group: "blind_person_hater",
-      description: "Majority of images lack alt tags and/or no ARIA attributes appear on the page"
+      description: "Majority of images lack <code>alt</code> attributes and/or no ARIA attributes appear on the page"
     }
   end
 end

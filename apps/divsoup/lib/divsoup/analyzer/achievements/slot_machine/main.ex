@@ -26,7 +26,7 @@ defmodule Divsoup.Achievement.SlotMachine do
       hierarchy: nil,
       title: "Slot Machine",
       group: "slot_machine",
-      description: "Page uses three <slot> elements in a row in a <template>"
+      description: "Page uses three <code>&lt;slot&gt;</code> elements in a row in a <code>&lt;template&gt;</code>"
     }
   end
 end

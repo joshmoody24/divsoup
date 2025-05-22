@@ -32,7 +32,7 @@ defmodule Divsoup.Achievement.VoidElements.OpenMinded do
       hierarchy: :gold,
       title: "Open-minded",
       group: "void_elements",
-      description: "No void elements include a trailing slash (<code>&lt;img&gt;</code> not <code>&lt;img /&gt;</code>)"
+      description: "No void elements include a trailing slash (<code>&lt;img&gt;</code>)"
     }
   end
 end

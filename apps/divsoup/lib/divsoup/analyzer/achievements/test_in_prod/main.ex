@@ -19,7 +19,7 @@ defmodule Divsoup.Achievement.TestInProd do
       hierarchy: nil,
       title: "Test in Prod",
       group: "test_in_prod",
-      description: "Page contains console.log statements"
+      description: "Page contains <code>console.log</code> statements"
     }
   end
   

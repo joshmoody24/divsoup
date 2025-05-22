@@ -36,7 +36,7 @@ defmodule Divsoup.Achievement.Zalgo do
       hierarchy: nil,
       title: "Zalgo",
       group: "zalgo",
-      description: "Page contains <strong>Zalgo</strong> text (corrupted Unicode with combining characters)"
+      description: "Page contains <strong>Zalgo text</strong> (corrupted Unicode with combining characters)"
     }
   end
 end

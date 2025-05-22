@@ -22,7 +22,7 @@ defmodule Divsoup.Achievement.DataDriven do
       hierarchy: nil,
       title: "Data Driven",
       group: "data_driven",
-      description: "More than 8 elements on the page have data-* attributes"
+      description: "More than <strong>8</strong> elements on the page have <code>data-</code> attributes"
     }
   end
   

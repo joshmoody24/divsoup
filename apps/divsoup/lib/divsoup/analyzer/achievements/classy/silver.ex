@@ -20,7 +20,7 @@ defmodule Divsoup.Achievement.ClassySilver do
       hierarchy: :silver,
       title: "Sophisticated",
       group: "classy",
-      description: "HTML class attributes make up more than 25% of the page's size"
+      description: "HTML <code>class</code> attributes make up more than <strong>25%</strong> of the page's size"
     }
   end
 end

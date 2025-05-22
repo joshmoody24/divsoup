@@ -8,4 +8,23 @@ defmodule DivsoupWeb.PageHTML do
   alias Divsoup.Analyzer.Job
 
   embed_templates "page_html/*"
+  
+  # Helper functions for the achievements page
+  def format_group_name(group) do
+    group
+    |> String.replace("_", " ")
+    |> String.split(" ")
+    |> Enum.map(&String.capitalize/1)
+    |> Enum.join(" ")
+  end
+  
+  def achievement_class(hierarchy) do
+    case hierarchy do
+      :bronze -> "bronze"
+      :silver -> "silver"
+      :gold -> "gold"
+      :platinum -> "platinum"
+      _ -> "standard"
+    end
+  end
 end

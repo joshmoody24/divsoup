@@ -38,7 +38,7 @@ defmodule Divsoup.Achievement.RegressiveEnhancement do
       hierarchy: nil,
       title: "Regressive Enhancement",
       group: "regressive_enhancement",
-      description: "Page includes a <noscript> element with barely anything in it"
+      description: "Page includes a <code>&lt;noscript&gt;</code> element with barely anything in it"
     }
   end
 end

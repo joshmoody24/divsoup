@@ -21,7 +21,7 @@ defmodule Divsoup.Achievement.DynamicContent do
       hierarchy: nil,
       title: "Dynamic Content",
       group: "dynamic_content",
-      description: "Page uses an <output> element"
+      description: "Page uses an <code>&lt;output&gt;</code> element"
     }
   end
 end

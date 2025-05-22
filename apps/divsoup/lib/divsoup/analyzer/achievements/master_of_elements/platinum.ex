@@ -33,7 +33,7 @@ defmodule Divsoup.Achievement.MasterOfElements.Platinum do
       hierarchy: :platinum,
       title: "Master of All #{total_elements} Elements",
       group: "master_of_elements",
-      description: "Page uses every HTML element, even the deprecated ones"
+      description: "Page uses <strong>every HTML element</strong>, even the deprecated ones"
     }
   end
 end
