@@ -57,8 +57,8 @@ defmodule Divsoup.Util.Color do
 
       # Unknown color
       true ->
-        # Default to white
-        "#FFFFFF"
+        # Return nil instead of defaulting to white to avoid false positives
+        nil
     end
   end
 
@@ -175,7 +175,7 @@ defmodule Divsoup.Util.Color do
   """
   def has_dark_mode_support?(html_tree, raw_html) do
     # Check for dark mode media query
-    has_query = has_dark_mode_query?(html_tree, raw_html)
+    has_query = has_meaningful_color_scheme_query?(html_tree, raw_html, "dark")
 
     if has_query do
       # Extract background color in dark mode
@@ -189,47 +189,32 @@ defmodule Divsoup.Util.Color do
   end
 
   @doc """
-  Check if the HTML has a dark mode media query.
-
+  Check if the HTML has a media query for a specific color scheme that affects main elements.
+  
   ## Parameters
   - `html_tree`: Floki parsed HTML tree
-  - `raw_html`: Raw HTML string
-
+  - `raw_html`: Raw HTML string (unused but kept for API consistency)
+  - `scheme`: Either "dark" or "light"
+  
   ## Returns
-  - `true` if a dark mode media query exists, `false` otherwise
+  - `true` if a media query for the specified scheme exists and affects main elements, `false` otherwise
   """
-  def has_dark_mode_query?(html_tree, raw_html) do
-    # Extract all style elements content
-    style_content =
-      Floki.find(html_tree, "style")
-      |> Enum.map(&Floki.text/1)
-      |> Enum.join(" ")
-
-    # Check both the style tags and the raw HTML for media queries
-    Regex.match?(~r/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)/i, style_content) ||
-      Regex.match?(~r/prefers-color-scheme\s*:\s*dark/i, raw_html)
-  end
-
-  @doc """
-  Check if the HTML has a light mode media query.
-
-  ## Parameters
-  - `html_tree`: Floki parsed HTML tree
-  - `raw_html`: Raw HTML string
-
-  ## Returns
-  - `true` if a light mode media query exists, `false` otherwise
-  """
-  def has_light_mode_query?(html_tree, raw_html) do
-    # Extract all style elements content
-    style_content =
-      Floki.find(html_tree, "style")
-      |> Enum.map(&Floki.text/1)
-      |> Enum.join(" ")
-
-    # Check both the style tags and the raw HTML for media queries
-    Regex.match?(~r/@media\s*\(\s*prefers-color-scheme\s*:\s*light\s*\)/i, style_content) ||
-      Regex.match?(~r/prefers-color-scheme\s*:\s*light/i, raw_html)
+  def has_meaningful_color_scheme_query?(html_tree, _raw_html, scheme) do
+    # Extract only style elements in the head section
+    # This avoids false positives from script tags or embedded code that might mention the media query
+    head_element = Floki.find(html_tree, "head")
+    style_elements = Floki.find(head_element, "style")
+    
+    # Process each style tag individually to avoid false positives
+    Enum.any?(style_elements, fn style ->
+      style_content = Floki.text(style)
+      
+      # Check for a media query that affects major elements like html, body, or main
+      # We need to ensure the query affects main content elements, not just minor placeholder elements
+      main_elements_pattern = ~r/@media\s*\(\s*prefers-color-scheme\s*:\s*#{scheme}\s*\)\s*\{[^}]*(html|body|main|\.container|#container|#root|#app|\.app|#main|\.main|\.content|#content)[^}]*\}/i
+      
+      Regex.match?(main_elements_pattern, style_content)
+    end)
   end
 
   @doc """
@@ -243,7 +228,7 @@ defmodule Divsoup.Util.Color do
   - `true` if the page uses light background in dark mode, `false` otherwise
   """
   def has_light_in_dark_mode?(html_tree, raw_html) do
-    if has_dark_mode_query?(html_tree, raw_html) do
+    if has_meaningful_color_scheme_query?(html_tree, raw_html, "dark") do
       dark_bg = extract_background_color(html_tree, raw_html, :dark)
       dark_bg && is_light_color?(dark_bg)
     else
@@ -262,7 +247,7 @@ defmodule Divsoup.Util.Color do
   - `true` if the page uses dark background in light mode, `false` otherwise
   """
   def has_dark_in_light_mode?(html_tree, raw_html) do
-    if has_light_mode_query?(html_tree, raw_html) do
+    if has_meaningful_color_scheme_query?(html_tree, raw_html, "light") do
       light_bg = extract_background_color(html_tree, raw_html, :light)
       light_bg && is_dark_color?(light_bg)
     else
@@ -302,8 +287,15 @@ defmodule Divsoup.Util.Color do
         _ -> nil
       end
 
-    # Use the first one we find (priority: html inline, body inline, body css, html css)
-    html_bg || body_bg || css_bg || html_css_bg
+    # Then try main element if it exists
+    main_bg =
+      case Regex.run(~r/main\s*{[^}]*(background(-color)?:\s*([^;]*))/i, style_content) do
+        [_, _, _, color_value] -> normalize_color(color_value)
+        _ -> nil
+      end
+
+    # Use the first one we find (priority: main, body inline, html inline, body css, html css)
+    main_bg || body_bg || html_bg || css_bg || html_css_bg
   end
 
   # Extract color from inline style
@@ -355,8 +347,10 @@ defmodule Divsoup.Util.Color do
         g = String.to_integer(g) |> min(255) |> max(0)
         b = String.to_integer(b) |> min(255) |> max(0)
 
-        # Convert to hex
-        "#" <> Integer.to_string(r, 16) <> Integer.to_string(g, 16) <> Integer.to_string(b, 16)
+        # Convert to hex with proper padding
+        "#" <> String.pad_leading(Integer.to_string(r, 16), 2, "0") <> 
+             String.pad_leading(Integer.to_string(g, 16), 2, "0") <> 
+             String.pad_leading(Integer.to_string(b, 16), 2, "0")
 
       _ ->
         # Try percentage format
@@ -366,13 +360,15 @@ defmodule Divsoup.Util.Color do
             g = (String.to_integer(g) * 255 / 100) |> round |> min(255) |> max(0)
             b = (String.to_integer(b) * 255 / 100) |> round |> min(255) |> max(0)
 
-            # Convert to hex
-            "#" <>
-              Integer.to_string(r, 16) <> Integer.to_string(g, 16) <> Integer.to_string(b, 16)
+            # Convert to hex with proper padding
+            "#" <> 
+              String.pad_leading(Integer.to_string(r, 16), 2, "0") <> 
+              String.pad_leading(Integer.to_string(g, 16), 2, "0") <> 
+              String.pad_leading(Integer.to_string(b, 16), 2, "0")
 
           _ ->
-            # Default to white
-            "#FFFFFF"
+            # Return nil instead of defaulting to white
+            nil
         end
     end
   end

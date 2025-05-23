@@ -11,8 +11,8 @@ defmodule Divsoup.Achievement.ChaoticEvil do
     dark_in_light = Color.has_dark_in_light_mode?(html_tree, raw_html)
     
     # Check for any media queries
-    has_dark_query = Color.has_dark_mode_query?(html_tree, raw_html)
-    has_light_query = Color.has_light_mode_query?(html_tree, raw_html)
+    has_dark_query = Color.has_meaningful_color_scheme_query?(html_tree, raw_html, "dark")
+    has_light_query = Color.has_meaningful_color_scheme_query?(html_tree, raw_html, "light")
     
     cond do
       # Truly chaotic evil: light in dark AND dark in light
@@ -29,7 +29,7 @@ defmodule Divsoup.Achievement.ChaoticEvil do
         
       # No media query at all
       !has_dark_query && !has_light_query ->
-        ["Page doesn't use prefers-color-scheme media queries"]
+        ["Page doesn't meaningfully use prefers-color-scheme media queries"]
         
       # Has queries but no chaotic behavior
       true ->

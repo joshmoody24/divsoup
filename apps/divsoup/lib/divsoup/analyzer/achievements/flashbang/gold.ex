@@ -21,9 +21,13 @@ defmodule Divsoup.Achievement.Flashbang do
       is_nil(bg_color) ->
         ["Could not determine page background color"]
         
-      # If background is light, award the achievement
-      Color.is_light_color?(bg_color) ->
+      # If background is definitely very light (stricter check), award the achievement
+      Color.calculate_brightness(bg_color) > 0.85 ->
         []
+        
+      # If background is moderately light, maybe not extreme enough for flashbang
+      Color.calculate_brightness(bg_color) > 0.7 ->
+        ["Page has light background but may not be bright enough to be considered a flashbang"]
         
       # Otherwise, not a light background
       true ->
