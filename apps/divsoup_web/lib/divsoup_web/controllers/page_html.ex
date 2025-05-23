@@ -27,4 +27,9 @@ defmodule DivsoupWeb.PageHTML do
       _ -> "standard"
     end
   end
+  
+  # Helper to get hyphenless job ID for URLs
+  def hyphenless_job_id(job) do
+    Job.hyphenless_id(job)
+  end
 end

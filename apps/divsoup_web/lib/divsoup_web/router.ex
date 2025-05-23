@@ -24,7 +24,7 @@ defmodule DivsoupWeb.Router do
     
     # Analysis routes
     get "/analysis/by-url/:url", PageController, :list_jobs_by_url
-    get "/analysis/:id", PageController, :view_job
+    get "/analysis/:id", PageController, :view_job, as: :job
   end
 
   # Other scopes may use custom stacks.

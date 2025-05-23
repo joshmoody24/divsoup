@@ -7,9 +7,18 @@
         <p>Your analysis is being processed. This page will refresh automatically.</p>
         <script>
           // Auto-refresh the page every 5 seconds if job is not complete
-          setTimeout(function() { 
-            window.location.reload(); 
-          }, 5000);
+          // But limit to 20 refreshes to prevent endless loops
+          const refreshCount = parseInt(sessionStorage.getItem('refreshCount_<%= job.id %>') || '0');
+          
+          if (refreshCount < 20) {
+            setTimeout(function() { 
+              sessionStorage.setItem('refreshCount_<%= job.id %>', refreshCount + 1);
+              window.location.reload(); 
+            }, 5000);
+          } else {
+            console.log("Max refresh count reached for job <%= job.id %>");
+            document.write("<p>Maximum refresh count reached. <a href='javascript:window.location.reload()'>Click here</a> to refresh manually.</p>");
+          }
         </script>
       <% end %>
 

@@ -67,10 +67,13 @@ defmodule Divsoup.Analyzer.JobService do
   end
 
   @doc """
-  Gets a job by ID.
+  Gets a job by ID. Handles both standard UUIDs and hyphenless UUIDs.
   """
   def get_job(id) do
-    case Repo.get(Job, id) do
+    # Convert hyphenless UUID to standard format if needed
+    uuid = hyphenless_to_uuid(id)
+    
+    case Repo.get(Job, uuid) do
       nil ->
         {:error, "Job not found"}
 
@@ -78,6 +81,16 @@ defmodule Divsoup.Analyzer.JobService do
         {:ok, job}
     end
   end
+  
+  @doc """
+  Converts a hyphenless UUID string to a standard UUID with hyphens.
+  """
+  def hyphenless_to_uuid(id) when byte_size(id) == 32 do
+    <<p1::binary-size(8), p2::binary-size(4), p3::binary-size(4), p4::binary-size(4), p5::binary-size(12)>> = id
+    "#{p1}-#{p2}-#{p3}-#{p4}-#{p5}"
+  end
+  
+  def hyphenless_to_uuid(id), do: id
 
   @doc """
   Extracts metrics and achievements from a job.
@@ -85,53 +98,73 @@ defmodule Divsoup.Analyzer.JobService do
   def get_job_with_metrics(job_id) do
     case get_job(job_id) do
       {:ok, job} ->
-        # Try to get results from cache first
-        cache_key = "job_metrics:#{job_id}"
-        case get_from_cache(cache_key) do
-          {:ok, cached_results} ->
-            Logger.info("Using cached results for job #{job_id}")
-            {:ok, cached_results}
+        # Only use cache for completed jobs
+        if Job.status(job) == :completed do
+          # Try to get results from cache first
+          cache_key = "job_metrics:#{job_id}"
+          case get_from_cache(cache_key) do
+            {:ok, cached_results} ->
+              Logger.info("Using cached results for completed job #{job_id}")
+              {:ok, cached_results}
           
           :not_found ->
-            # Cache miss, fetch and process data
-            case job.html_url do
-              url when is_binary(url) ->
-                with {:ok, 200, _headers, ref} = :hackney.get(url),
-                     {:ok, body} = :hackney.body(ref),
-                     {:ok, parsed_html} = Floki.parse_document(body) do
-                  Logger.info("Parsed HTML successfully for job #{job_id}")
-
-                  achievements =
-                    AchievementList.all()
-                    |> Enum.map(fn achievement ->
-                      %{
-                        achievement: achievement.achievement(),
-                        fulfills_criteria: Enum.empty?(achievement.evaluate(parsed_html, body))
-                      }
-                    end)
-                    |> Enum.filter(fn result -> result.fulfills_criteria end)
-                    |> Enum.map(fn result -> result.achievement end)
-
-                  results = %{
-                    job: job,
-                    achievements: achievements
-                  }
-                  
-                  # Store in cache for future requests
-                  store_in_cache(cache_key, results)
-                  
-                  {:ok, results}
-                end
-
-              nil ->
-                results = %{job: job, achievements: []}
-                store_in_cache(cache_key, results)
-                {:ok, results}
-            end
+            # Process and cache data for completed jobs
+            process_job_achievements(job, job_id)
+          end
+        else
+          # For non-completed jobs, always process without caching
+          Logger.info("Processing non-completed job #{job_id} without caching")
+          process_job_achievements(job, job_id)
         end
 
       error ->
         error
+    end
+  end
+  
+  # Helper function to process job achievements and optionally cache them
+  defp process_job_achievements(job, job_id) do
+    cache_key = "job_metrics:#{job_id}"
+    
+    case job.html_url do
+      url when is_binary(url) ->
+        with {:ok, 200, _headers, ref} = :hackney.get(url),
+             {:ok, body} = :hackney.body(ref),
+             {:ok, parsed_html} = Floki.parse_document(body) do
+          Logger.info("Parsed HTML successfully for job #{job_id}")
+
+          achievements =
+            AchievementList.all()
+            |> Enum.map(fn achievement ->
+              %{
+                achievement: achievement.achievement(),
+                fulfills_criteria: Enum.empty?(achievement.evaluate(parsed_html, body))
+              }
+            end)
+            |> Enum.filter(fn result -> result.fulfills_criteria end)
+            |> Enum.map(fn result -> result.achievement end)
+
+          results = %{
+            job: job,
+            achievements: achievements
+          }
+          
+          # Store in cache only for completed jobs
+          if Job.status(job) == :completed do
+            Logger.info("Caching results for completed job #{job_id}")
+            store_in_cache(cache_key, results)
+          end
+          
+          {:ok, results}
+        end
+
+      nil ->
+        results = %{job: job, achievements: []}
+        # Only cache if job is completed
+        if Job.status(job) == :completed do
+          store_in_cache(cache_key, results)
+        end
+        {:ok, results}
     end
   end
 
@@ -168,8 +201,11 @@ defmodule Divsoup.Analyzer.JobService do
         # Ensure started_at is set if not already
         started_at = if is_nil(job.started_at), do: DateTime.utc_now(), else: job.started_at
 
-        # Invalidate cache for this job if it exists
-        :ets.delete(@cache_table, "job_metrics:#{id}")
+        # Invalidate any cached data for this job
+        # We'll re-cache on next request after it's completed
+        cache_key = "job_metrics:#{id}"
+        Logger.info("Invalidating cache for job #{id} on completion")
+        :ets.delete(@cache_table, cache_key)
 
         job
         |> Job.changeset(%{
@@ -197,8 +233,10 @@ defmodule Divsoup.Analyzer.JobService do
         # Ensure started_at is set if not already
         started_at = if is_nil(job.started_at), do: DateTime.utc_now(), else: job.started_at
 
-        # Invalidate cache for this job if it exists
-        :ets.delete(@cache_table, "job_metrics:#{id}")
+        # Invalidate any cached data for this job
+        cache_key = "job_metrics:#{id}"
+        Logger.info("Invalidating cache for failed job #{id}")
+        :ets.delete(@cache_table, cache_key)
         
         job
         |> Job.changeset(%{

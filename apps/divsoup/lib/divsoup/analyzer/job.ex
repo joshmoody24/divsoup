@@ -1,6 +1,9 @@
 defmodule Divsoup.Analyzer.Job do
   use Ecto.Schema
   import Ecto.Changeset
+  
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
 
   schema "analysis_jobs" do
     field :url, :string
@@ -69,5 +72,12 @@ defmodule Divsoup.Analyzer.Job do
         # In progress, get elapsed time
         DateTime.diff(DateTime.utc_now(), job.started_at)
     end
+  end
+  
+  @doc """
+  Returns the ID of the job as a hyphenless string for cleaner URLs.
+  """
+  def hyphenless_id(job) do
+    String.replace(job.id, "-", "")
   end
 end

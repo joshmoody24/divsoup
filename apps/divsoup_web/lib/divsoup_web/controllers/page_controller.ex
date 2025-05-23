@@ -66,7 +66,7 @@ defmodule DivsoupWeb.PageController do
       {:ok, job} ->
         conn
         |> put_flash(:info, "Analysis created and scheduled for #{url}")
-        |> redirect(to: ~p"/analysis/#{job.id}")
+        |> redirect(to: ~p"/analysis/#{Divsoup.Analyzer.Job.hyphenless_id(job)}")
 
       {:error, reason} ->
         conn
@@ -77,9 +77,9 @@ defmodule DivsoupWeb.PageController do
 
   # View a single job by ID
   def view_job(conn, %{"id" => id}) do
-    job_id = String.to_integer(id)
+    # JobService.get_job_with_metrics will handle converting hyphenless UUIDs
 
-    case JobService.get_job_with_metrics(job_id) do
+    case JobService.get_job_with_metrics(id) do
       {:ok, results} ->
         # Group achievements by their group
         achievements_by_group = 
