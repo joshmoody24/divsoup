@@ -81,13 +81,35 @@ defmodule DivsoupWeb.PageController do
 
     case JobService.get_job_with_metrics(job_id) do
       {:ok, results} ->
-        # Sort achievements by hierarchy level (platinum first)
-        sorted_achievements = 
+        # Group achievements by their group
+        achievements_by_group = 
           results.achievements
-          |> Enum.sort_by(fn achievement -> 
-            # Reverse the order so platinum (4) is first
-            -achievement_level_to_number(achievement.hierarchy)
+          |> Enum.group_by(fn achievement -> achievement.group end)
+        
+        # Calculate score for each group
+        scored_groups = 
+          achievements_by_group
+          |> Enum.map(fn {group, achievements} ->
+            # Calculate total score for this group (bronze=1, silver=2, gold=3, platinum=4)
+            total_score = Enum.reduce(achievements, 0, fn a, acc ->
+              acc + achievement_level_to_number(a.hierarchy)
+            end)
+            
+            # Sort achievements within the group by hierarchy (platinum first)
+            sorted_achievements = Enum.sort_by(achievements, fn a ->
+              -achievement_level_to_number(a.hierarchy)
+            end)
+            
+            {group, sorted_achievements, total_score}
           end)
+        
+        # Sort groups by total score (highest first)
+        sorted_groups = Enum.sort_by(scored_groups, fn {_group, _achievements, score} -> -score end)
+        
+        # Flatten the achievements list, keeping groups together
+        sorted_achievements = Enum.flat_map(sorted_groups, fn {_group, achievements, _score} -> 
+          achievements
+        end)
         
         conn
         |> assign(:title, "Analysis")
@@ -130,12 +152,35 @@ defmodule DivsoupWeb.PageController do
         Enum.map(jobs, fn job ->
           case JobService.get_job_with_metrics(job.id) do
             {:ok, results} -> 
-              # Sort achievements by hierarchy
-              sorted_achievements = 
+              # Group and sort achievements the same way as in view_job
+              achievements_by_group = 
                 results.achievements
-                |> Enum.sort_by(fn achievement -> 
-                  -achievement_level_to_number(achievement.hierarchy)
+                |> Enum.group_by(fn achievement -> achievement.group end)
+              
+              # Calculate score for each group
+              scored_groups = 
+                achievements_by_group
+                |> Enum.map(fn {group, achievements} ->
+                  # Calculate total score for this group
+                  total_score = Enum.reduce(achievements, 0, fn a, acc ->
+                    acc + achievement_level_to_number(a.hierarchy)
+                  end)
+                  
+                  # Sort achievements within the group by hierarchy (platinum first)
+                  sorted_achievements = Enum.sort_by(achievements, fn a ->
+                    -achievement_level_to_number(a.hierarchy)
+                  end)
+                  
+                  {group, sorted_achievements, total_score}
                 end)
+              
+              # Sort groups by total score (highest first)
+              sorted_groups = Enum.sort_by(scored_groups, fn {_group, _achievements, score} -> -score end)
+              
+              # Flatten the achievements list, keeping groups together
+              sorted_achievements = Enum.flat_map(sorted_groups, fn {_group, achievements, _score} -> 
+                achievements
+              end)
               
               {results.job, sorted_achievements}
             
