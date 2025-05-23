@@ -51,12 +51,39 @@ if config_env() == :prod do
     # Parse connection params
     maybe_ipv6 = if System.get_env("ECTO_IPV6"), do: [:inet6], else: []
 
+    # Get SSL settings (defaults to enabled)
+    use_ssl = System.get_env("POSTGRES_USE_SSL") != "false"
+    ca_cert_path = System.get_env("POSTGRES_CA_CERT", "/etc/ssl/certs/rds-ca-bundle.pem")
+
+    Logger.info("PostgreSQL SSL: #{if use_ssl, do: "enabled", else: "disabled"}")
+
+    # Extract hostname from database URL for SNI
+    hostname =
+      try do
+        database_url
+        |> URI.parse()
+        |> Map.get(:host, "localhost")
+        |> String.to_charlist()
+      rescue
+        _ -> ~c"localhost"
+      end
+
     config :divsoup, Divsoup.Repo,
       url: database_url,
       pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
       socket_options: maybe_ipv6,
       # Explicitly set adapter
-      adapter: Ecto.Adapters.Postgres
+      adapter: Ecto.Adapters.Postgres,
+      # Enable SSL by default but allow disabling via env var
+      ssl: use_ssl,
+      ssl_opts: [
+        cacertfile: ca_cert_path,
+        verify: :verify_peer,
+        server_name_indication: hostname,
+        customize_hostname_check: [
+          match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+        ]
+      ]
   end
 
   import Config

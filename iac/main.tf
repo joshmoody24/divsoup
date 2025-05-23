@@ -507,22 +507,14 @@ ENVFILE
 
 export MIX_ENV=prod
 
-# g) Build Phoenix app
-set +e
-mix local.hex --force || true
-echo "finished installing hex"
-# mix deps.get --only prod
-mix deps.get
-mix compile
-mix phx.digest
-set -e
-
-# h) Verify installation
-elixir --version
-erl -noshell -eval 'io:format("OK~n"), init:stop()'
+# avoid building phx app here because it always breaks the shell for some reason and skips the down to after UBUNTU_EOF
 
 # set up chrome screenshot location
 mkdir -p ~/divsoup_files
+
+# install certs for RDS
+sudo curl -fsSL https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /etc/ssl/certs/rds-ca-bundle.pem
+sudo update-ca-certificates
 UBUNTU_EOF
 
 # 5) Create & enable systemd service

@@ -9,7 +9,8 @@ config :divsoup, Divsoup.Repo,
   pool_size: 10,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  adapter: Ecto.Adapters.Postgres
+  adapter: Ecto.Adapters.Postgres,
+  ssl: true
 
 # Note we also include the path to a cache manifest
 # containing the digested version of static files. This
