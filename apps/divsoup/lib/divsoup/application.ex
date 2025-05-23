@@ -21,8 +21,8 @@ defmodule Divsoup.Application do
       {Finch, name: Divsoup.Finch},
       # Start the job queue
       {Divsoup.Analyzer.JobQueue, []},
-      # Start the analysis worker
-      {Divsoup.Analyzer.Worker, [poll_interval: 5_000]}
+      # Start the worker supervisor (which will start multiple workers)
+      {Divsoup.Analyzer.WorkerSupervisor, []}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Divsoup.Supervisor)

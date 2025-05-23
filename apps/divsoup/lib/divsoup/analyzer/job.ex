@@ -13,6 +13,12 @@ defmodule Divsoup.Analyzer.Job do
     field :screenshot_url, :string
     field :pdf_url, :string
     field :errors, :map
+    
+    # Worker-related fields
+    field :claimed_by, :string
+    field :claimed_at, :utc_datetime
+    field :retry_count, :integer, default: 0
+    field :max_retries, :integer, default: 3
 
     timestamps()
   end
@@ -20,7 +26,10 @@ defmodule Divsoup.Analyzer.Job do
   @doc false
   def changeset(job, attrs) do
     job
-    |> cast(attrs, [:url, :started_at, :finished_at, :html_url, :screenshot_url, :pdf_url, :errors])
+    |> cast(attrs, [
+      :url, :started_at, :finished_at, :html_url, :screenshot_url, :pdf_url, :errors,
+      :claimed_by, :claimed_at, :retry_count, :max_retries
+    ])
     |> validate_required([:url])
   end
   

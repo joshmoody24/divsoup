@@ -207,13 +207,20 @@ defmodule Divsoup.Analyzer.JobService do
         Logger.info("Invalidating cache for job #{id} on completion")
         :ets.delete(@cache_table, cache_key)
 
+        worker_id = job.claimed_by || "unknown"
+        Logger.info("Worker #{worker_id} completed job #{id}")
+
         job
         |> Job.changeset(%{
           started_at: started_at,
           html_url: results.s3_html_url,
           screenshot_url: results.s3_screenshot_url,
           pdf_url: results.s3_pdf_url,
-          finished_at: DateTime.utc_now()
+          finished_at: DateTime.utc_now(),
+          # We keep claimed_by/claimed_at to know which worker completed the job
+          # but clear errors and retry_count since the job completed successfully
+          errors: nil,
+          retry_count: 0
         })
         |> Repo.update()
     end
@@ -232,19 +239,33 @@ defmodule Divsoup.Analyzer.JobService do
       _ ->
         # Ensure started_at is set if not already
         started_at = if is_nil(job.started_at), do: DateTime.utc_now(), else: job.started_at
+        
+        # Increment retry count if not already set
+        retry_count = (job.retry_count || 0) + 1
 
         # Invalidate any cached data for this job
         cache_key = "job_metrics:#{id}"
         Logger.info("Invalidating cache for failed job #{id}")
         :ets.delete(@cache_table, cache_key)
         
-        job
+        # Clear the claimed_by field so job can be picked up again if retries remain
+        result = job
         |> Job.changeset(%{
           started_at: started_at,
           errors: error_data,
-          finished_at: DateTime.utc_now()
+          finished_at: DateTime.utc_now(),
+          retry_count: retry_count,
+          claimed_by: nil,
+          claimed_at: nil
         })
         |> Repo.update()
+        
+        case result do
+          {:ok, updated_job} -> 
+            Logger.info("Job #{id} failed (attempt #{retry_count}/#{updated_job.max_retries})")
+            {:ok, updated_job}
+          error -> error
+        end
     end
   end
 

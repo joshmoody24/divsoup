@@ -11,6 +11,12 @@ defmodule Divsoup.Analyzer.Worker do
 
   @doc """
   Starts the worker process.
+  
+  ## Options
+  
+  * `:name` - The name to register the process under
+  * `:worker_id` - A unique identifier for this worker (used in job claims)
+  * `:poll_interval` - How often to poll for new jobs in milliseconds
   """
   def start_link(opts \\ []) do
     # Extract name from options or use module name as default
@@ -31,30 +37,38 @@ defmodule Divsoup.Analyzer.Worker do
   def init(opts) do
     # Extract poll interval from options or use default
     poll_interval = Keyword.get(opts, :poll_interval, 5_000)
+    
+    # Extract or generate a worker ID
+    worker_id = Keyword.get(opts, :worker_id, "worker_#{:rand.uniform(1000000)}")
+    
+    Logger.info("Starting worker #{worker_id} with poll interval #{poll_interval}ms")
 
     # Schedule first poll
     send(self(), :poll)
 
-    # Initialize state with just poll_interval
-    {:ok, %{poll_interval: poll_interval}}
+    # Initialize state with poll_interval and worker_id
+    {:ok, %{poll_interval: poll_interval, worker_id: worker_id}}
   end
 
   @impl true
   def handle_info(:poll, state) do
-    # Try to dequeue a job from the JobQueue
-    case JobQueue.dequeue() do
+    # Try to claim a job from the JobQueue with this worker's ID
+    case JobQueue.claim_job(state.worker_id) do
       {:ok, job} ->
-        Logger.info("Worker dequeued job #{job.id} for processing")
-        JobService.mark_job_in_progress(job.id)
+        Logger.info("Worker #{state.worker_id} claimed job #{job.id} for processing")
         server_pid = self()
 
         Task.start(fn ->
-          process_job(job)
+          process_job(job, state.worker_id)
           send(server_pid, :poll)
         end)
 
-      {:error, :empty} ->
-        Logger.debug("No jobs to process: queue is empty")
+      {:error, :no_jobs} ->
+        Logger.debug("No jobs available for worker #{state.worker_id}")
+        Process.send_after(self(), :poll, state.poll_interval)
+        
+      {:error, reason} ->
+        Logger.warning("Worker #{state.worker_id} failed to claim job: #{inspect(reason)}")
         Process.send_after(self(), :poll, state.poll_interval)
     end
 
@@ -69,10 +83,10 @@ defmodule Divsoup.Analyzer.Worker do
 
   # Private Helper Functions
 
-  defp process_job(job) do
+  defp process_job(job, worker_id) do
     # Log start time for performance tracking
     start_time = System.monotonic_time(:millisecond)
-    Logger.info("Starting analysis for job #{job.id}, URL: #{job.url}")
+    Logger.info("Worker #{worker_id} starting analysis for job #{job.id}, URL: #{job.url}")
 
     try do
       results = analyze_website(job.url)
@@ -80,7 +94,7 @@ defmodule Divsoup.Analyzer.Worker do
 
       # Log completion
       elapsed = System.monotonic_time(:millisecond) - start_time
-      Logger.info("Successfully completed job #{job.id} in #{elapsed}ms")
+      Logger.info("Worker #{worker_id} successfully completed job #{job.id} in #{elapsed}ms")
     rescue
       e ->
         # Get stacktrace for better error reporting
@@ -89,15 +103,28 @@ defmodule Divsoup.Analyzer.Worker do
         # Record job failure with error details
         error_data = %{
           error: Exception.message(e),
-          stacktrace: stacktrace
+          stacktrace: stacktrace,
+          worker_id: worker_id
         }
 
-        JobService.fail_job(job.id, error_data)
+        # Try to increment retry count and potentially retry the job
+        case JobService.fail_job(job.id, error_data) do
+          {:ok, updated_job} ->
+            if updated_job.retry_count < updated_job.max_retries do
+              Logger.warning("Worker #{worker_id} will retry job #{job.id} (attempt #{updated_job.retry_count + 1})")
+              # The job will be picked up again by a worker (possibly this one) after a delay
+            else
+              Logger.error("Worker #{worker_id} failed job #{job.id} permanently after #{updated_job.retry_count} attempts")
+            end
+          
+          error ->
+            Logger.error("Worker #{worker_id} couldn't update job #{job.id} failure status: #{inspect(error)}")
+        end
 
         elapsed = System.monotonic_time(:millisecond) - start_time
 
         Logger.error(
-          "Failed job #{job.id} after #{elapsed}ms: #{Exception.message(e)}\n#{stacktrace}"
+          "Worker #{worker_id} failed job #{job.id} after #{elapsed}ms: #{Exception.message(e)}\n#{stacktrace}"
         )
     end
   end

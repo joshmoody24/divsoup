@@ -10,6 +10,16 @@ import Config
 if config_env() == :prod do
   # Load all ENV variables to debug what's being set
   require Logger
+  
+  # Get the number of worker processes for parallel job processing
+  worker_count = 
+    System.get_env("DIVSOUP_WORKER_COUNT", "1")
+    |> String.to_integer()
+  
+  Logger.info("Worker count from ENV: #{worker_count}")
+  
+  # Configure the worker pool size
+  config :divsoup, :worker_count, worker_count
 
   # Get the DB adapter and log it
   # Default to postgres if not set

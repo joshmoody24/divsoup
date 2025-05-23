@@ -1,5 +1,12 @@
 import Config
 
+# Configure worker count for parallel processing
+worker_count = 
+  System.get_env("DIVSOUP_WORKER_COUNT", "1")
+  |> String.to_integer()
+
+config :divsoup, :worker_count, worker_count
+
 # Configure your database
 config :divsoup, Divsoup.Repo,
   database: Path.expand("../divsoup.db", __DIR__),

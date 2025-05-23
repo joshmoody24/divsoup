@@ -1,5 +1,12 @@
 import Config
 
+# For tests, default to 1 worker but allow override
+worker_count = 
+  System.get_env("DIVSOUP_WORKER_COUNT", "1")
+  |> String.to_integer()
+
+config :divsoup, :worker_count, worker_count
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
