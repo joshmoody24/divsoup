@@ -108,65 +108,60 @@ defmodule Divsoup.Achievement.AsciiArt do
   end
   
   # Check if a comment likely contains code rather than ASCII art
-  defp is_likely_code?(comment) do
-    # Definitive code markers that aren't typically in ASCII art
-    definitive_code_markers = [
-      "[if", 
-      "function",
-      "var ",
-      "class=",
-      "<script",
-      "</script>",
-      "<![endif]"
-    ]
-    
-    # Check if any definitive code markers are present
-    has_code_markers = Enum.any?(definitive_code_markers, fn marker ->
-      String.contains?(comment, marker)
-    end)
-    
-    # If any code markers are found, it's likely code
-    if has_code_markers do
+defp is_likely_code?(comment) do
+  # 1) if the comment is blank (or only spaces/newlines), it's not code
+  trimmed = String.trim(comment)
+  if trimmed == "" do
+    false
+  else
+    # 2) “definitive code markers” check stays the same
+    definitive_code_markers = ["[if", "function", "var ", "class=", "<script", "</script>", "<![endif]"]
+    if Enum.any?(definitive_code_markers, &String.contains?(trimmed, &1)) do
       true
     else
-      # Check for ASCII art-like lines
-      lines = comment |> String.split("\n") |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))
-      
-      # Need multiple lines to check for ASCII art patterns
-      if length(lines) >= 3 do
-        # ASCII art symbols (more limited, focused set)
-        art_symbols = ["/", "\\", "|", "-", "_", "+", "=", ">", "<", "^", "(", ")"]
-        
-        # Count lines that have ASCII art characteristics
-        art_like_lines = Enum.count(lines, fn line ->
-          # Remove spaces to work with content only
-          content = String.replace(line, " ", "")
-          
-          if String.length(content) > 0 do
-            # Count art symbols
-            symbol_count = Enum.sum(Enum.map(art_symbols, fn symbol ->
-              String.graphemes(content) |> Enum.count(fn c -> c == symbol end)
-            end))
-            
-            # Line is art-like if >30% of its content is art symbols
-            symbol_count / String.length(content) > 0.3
-          else
+      # split out the non-empty lines
+      lines =
+        trimmed
+        |> String.split("\n")
+        |> Enum.map(&String.trim/1)
+        |> Enum.reject(&(&1 == ""))
+
+      cond do
+        # 3) if we have 3 or more lines, use the “art‐like lines” ratio
+        length(lines) >= 3 ->
+          art_symbols = ["/", "\\", "|", "-", "_", "+", "=", ">", "<", "^", "(", ")"]
+          art_like =
+            Enum.count(lines, fn line ->
+              content = String.replace(line, " ", "")
+              len = String.length(content)
+              # only test non-empty content
+              len > 0 and
+                (Enum.sum(
+                   for sym <- art_symbols do
+                     String.graphemes(content) |> Enum.count(&(&1 == sym))
+                   end
+                 ) / len) > 0.3
+            end)
+
+          # safe because length(lines) >= 3
+          art_like / length(lines) < 0.33
+
+        # 4) fewer than 3 lines, fall back to alphanumeric‐dominance
+        true ->
+          # strip *all* whitespace
+          raw = String.replace(trimmed, ~r/\s/, "")
+          raw_len = String.length(raw)
+
+          # never divide if raw_len == 0
+          if raw_len == 0 do
             false
+          else
+            alpha_count = Regex.replace(~r/[^a-zA-Z0-9]/, raw, "") |> String.length()
+            (alpha_count / raw_len) > 0.7
           end
-        end)
-        
-        # If more than 1/3 of lines look like ASCII art, it's probably not code
-        art_like_ratio = art_like_lines / length(lines)
-        art_like_ratio < 0.33
-      else
-        # Too few lines to analyze patterns, check alphanumeric dominance
-        text = String.replace(comment, ~r/\s/, "")
-        alphanumeric_count = Regex.replace(~r/[^a-zA-Z0-9]/, text, "") |> String.length()
-        alphanumeric_ratio = alphanumeric_count / String.length(text)
-        
-        # Code is predominantly alphanumeric
-        alphanumeric_ratio > 0.7
       end
     end
   end
 end
+end
+
