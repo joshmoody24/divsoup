@@ -44,7 +44,13 @@ defmodule Divsoup.Analyzer.Browser do
       # Execute Chrome in headless mode to capture rendered HTML
       chrome_cmd = build_chrome_command(url, file_path)
       Logger.debug("Chrome command: #{chrome_cmd}")
-      {_, status} = System.cmd("sh", ["-c", chrome_cmd])
+      {output, status} = System.cmd("sh", ["-c", chrome_cmd])
+      
+      # Log the output and status for debugging
+      Logger.info("Chrome command exit status: #{status}")
+      if status != 0 do
+        Logger.error("Chrome command output: #{output}")
+      end
       
       # Generate screenshot and PDF paths
       screenshot_path = "#{Path.rootname(file_path)}_screenshot.png"
@@ -124,7 +130,16 @@ defmodule Divsoup.Analyzer.Browser do
     end
   end
   
-  defp check_output(status, _, _, _) do
-    {:error, "Chrome execution failed with status #{status}"}
+  defp check_output(status, html_path, _, _) do
+    # Try to read error log for more details
+    error_log_path = "#{Path.rootname(html_path)}_chrome_error.log"
+    error_details = if File.exists?(error_log_path) do
+      error_content = File.read!(error_log_path)
+      ". Error details: #{String.slice(error_content, 0, 1000)}"
+    else
+      ""
+    end
+    
+    {:error, "Chrome execution failed with status #{status}#{error_details}"}
   end
 end
