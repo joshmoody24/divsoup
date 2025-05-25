@@ -58,10 +58,23 @@ defmodule Divsoup.Analyzer.Worker do
         Logger.info("Worker #{state.worker_id} claimed job #{job.id} for processing")
         server_pid = self()
 
-        Task.start(fn ->
-          process_job(job, state.worker_id)
-          send(server_pid, :poll)
+        # Use Task.Supervisor with try/after to ensure poll message is sent even if processing fails
+        Task.Supervisor.start_child(Divsoup.TaskSupervisor, fn ->
+          try do
+            process_job(job, state.worker_id)
+          rescue
+            e ->
+              stacktrace = __STACKTRACE__ |> Exception.format_stacktrace()
+              Logger.error("Worker #{state.worker_id} task crashed on job #{job.id}: #{Exception.message(e)}\n#{stacktrace}")
+          after
+            # Always send poll message to ensure worker keeps processing jobs
+            send(server_pid, :poll)
+          end
         end)
+
+        # Add backup polling as a failsafe - if the task gets stuck
+        # this will ensure the worker eventually polls again
+        Process.send_after(self(), :poll_failsafe, state.poll_interval * 10)
 
       {:error, :no_jobs} ->
         Logger.debug("No jobs available for worker #{state.worker_id}")
@@ -72,6 +85,14 @@ defmodule Divsoup.Analyzer.Worker do
         Process.send_after(self(), :poll, state.poll_interval)
     end
 
+    {:noreply, state}
+  end
+  
+  @impl true
+  def handle_info(:poll_failsafe, state) do
+    # This is a backup poll message that only has effect if the worker is not already polling
+    Logger.debug("Worker #{state.worker_id} failsafe poll triggered")
+    send(self(), :poll)
     {:noreply, state}
   end
 

@@ -19,6 +19,8 @@ defmodule Divsoup.Application do
       {Phoenix.PubSub, name: Divsoup.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Divsoup.Finch},
+      # Start a Task.Supervisor for managing job processing tasks
+      {Task.Supervisor, name: Divsoup.TaskSupervisor},
       # Start the job queue
       {Divsoup.Analyzer.JobQueue, []},
       # Start the worker supervisor (which will start multiple workers)
