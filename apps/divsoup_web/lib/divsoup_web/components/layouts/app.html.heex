@@ -23,7 +23,9 @@
       <div class="footer-links">
         <p>&copy; 2025 <a href="https://joshmoody.org/" target="_blank">Josh Moody</a> | <a href="https://github.com/joshmoody24/" target="_blank">GitHub</a></p>
       </div>
-      <p>Queue size: {JobQueue.queue_length()}</p>
+      <%= if @conn.request_path != "/" do %>
+        <p>Queue size: {JobQueue.queue_length()}</p>
+      <% end %>
     </div>
   </footer>
 </div>
