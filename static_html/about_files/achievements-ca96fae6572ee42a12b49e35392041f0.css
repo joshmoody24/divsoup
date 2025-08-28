@@ -1,0 +1,95 @@
+/* Achievement header colors based on hierarchy */
+.terminal-card > header.bronze {
+  background: linear-gradient(135deg, #a06a2f 0%, #cd8c50 50%, #a06a2f 100%);
+  background-size: 200% 200%;
+  animation: subtle-sheen 8s ease infinite;
+  color: white;
+}
+
+.terminal-card > header.silver {
+  background: linear-gradient(135deg, #a0a0a0 0%, #d5d5d5 50%, #a0a0a0 100%);
+  background-size: 200% 200%;
+  animation: subtle-sheen 8s ease infinite;
+  color: #222;
+}
+
+.terminal-card > header.gold {
+  background: linear-gradient(135deg, #b8a44a 0%, #e6ce6a 50%, #b8a44a 100%);
+  background-size: 200% 200%;
+  animation: subtle-sheen 8s ease infinite;
+  color: #222;
+}
+
+.terminal-card > header.platinum {
+  background: linear-gradient(
+    45deg,
+    #614a81,
+    #2a6894,
+    #166b5b,
+    #2d7a52,
+    #a48d47,
+    #a65f2e,
+    #a14a46,
+    #614a81
+  );
+  background-size: 600% 600%;
+  animation: rainbow 8s ease infinite;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+@keyframes rainbow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes subtle-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Achievements page layout */
+.achievements-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.achievement-group h2 {
+  margin-bottom: 15px;
+  border-bottom: 1px solid var(--secondary-color);
+  padding-bottom: 5px;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.achievement-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.hierarchy-badge {
+  float: right;
+  font-size: 0.8em;
+  font-style: italic;
+  text-transform: capitalize;
+}
+
