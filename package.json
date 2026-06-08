@@ -1,0 +1,30 @@
+{
+  "name": "divsoup",
+  "version": "1.0.0",
+  "description": "A site that scans websites and gives them weird awards based on how cursed their HTML is.",
+  "main": "index.js",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshmoody24/divsoup.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/joshmoody24/divsoup/issues"
+  },
+  "homepage": "https://github.com/joshmoody24/divsoup#readme",
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "vitest": "^3.2.6"
+  },
+  "private": true
+}

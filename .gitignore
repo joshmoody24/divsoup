@@ -41,3 +41,6 @@ erl_crash.dump
 /iac/terraform.rc
 
 **/.claude/settings.local.json
+
+# Node
+/node_modules/
