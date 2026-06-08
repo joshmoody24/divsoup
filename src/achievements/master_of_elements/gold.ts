@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "master_of_elements.gold",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "master_of_elements",
   description: "Page uses at least <strong>#{@required_elements}</strong> different HTML elements",
   hierarchy: "gold",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("master_of_elements.gold", context),
 };

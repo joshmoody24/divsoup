@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "you_are_amazing_embed.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "embed",
   description: "Page embeds external content via <code>&lt;object&gt;</code>, <code>&lt;embed&gt;</code>, or <code>&lt;iframe&gt;</code>",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("you_are_amazing_embed.main", context),
 };

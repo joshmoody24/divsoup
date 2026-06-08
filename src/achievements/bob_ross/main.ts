@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "bob_ross.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "bob_ross",
   description: "Page includes a <code>&lt;canvas&gt;</code> or <code>&lt;picture&gt;</code> element",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("bob_ross.main", context),
 };

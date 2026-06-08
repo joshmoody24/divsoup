@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "phd_purist.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "phd_purist",
   description: "Use the <code>&lt;math&gt;</code> element for something nontrivial",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("phd_purist.main", context),
 };

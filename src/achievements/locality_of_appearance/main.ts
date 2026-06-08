@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "locality_of_appearance.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "locality_of_appearance",
   description: "Page has more CSS in <code>style</code> attributes than <code>class</code> attributes",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("locality_of_appearance.main", context),
 };

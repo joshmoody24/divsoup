@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "flashbang.platinum",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "seared_retinas",
   description: "The primary background color is light when the user prefers dark mode and dark when the user prefers light mode",
   hierarchy: "platinum",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("flashbang.platinum", context),
 };

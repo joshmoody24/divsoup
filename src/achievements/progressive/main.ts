@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "progressive.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "progressive",
   description: "Page contains both a <code>&lt;progress&gt;</code> and <code>&lt;meter&gt;</code> element",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("progressive.main", context),
 };

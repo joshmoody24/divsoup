@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "web_1_0_certified.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "the_good_old_days",
   description: "Page is authored in HTML 3.2",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("web_1_0_certified.main", context),
 };

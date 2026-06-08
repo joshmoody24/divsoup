@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "vintage.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "vintage",
   description: "Page uses a nested table layout",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("vintage.main", context),
 };

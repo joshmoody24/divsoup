@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "hyperlink_collector.bronze",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "hyperlink_collector",
   description: "Page contains links to at least <strong>#{@min_domains}</strong> different external domains",
   hierarchy: "bronze",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("hyperlink_collector.bronze", context),
 };

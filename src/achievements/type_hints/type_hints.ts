@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "type_hints.type_hints",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "semistatic_types",
   description: "Page uses a <code>&lt;datalist&gt;</code> element",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("type_hints.type_hints", context),
 };

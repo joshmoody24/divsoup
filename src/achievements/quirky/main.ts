@@ -1,4 +1,5 @@
 import type { AchievementRule } from "../types";
+import { evaluateLegacyRule } from "../legacy_evaluate";
 
 export const rule: AchievementRule = {
   id: "quirky.main",
@@ -6,5 +7,5 @@ export const rule: AchievementRule = {
   group: "quirky",
   description: "Page renders in quirks mode",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: (context) => evaluateLegacyRule("quirky.main", context),
 };
