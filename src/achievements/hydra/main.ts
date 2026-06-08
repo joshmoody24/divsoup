@@ -6,5 +6,5 @@ export const rule: AchievementRule = {
   group: "hydra",
   description: "Page contains multiple <code>&lt;h1&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: ({ doc }) => doc.querySelectorAll("h1").length > 1,
 };

@@ -6,5 +6,5 @@ export const rule: AchievementRule = {
   group: "htmx",
   description: "Page contains a reference to <a href=\"https://htmx.org\" target=\"_blank\">HTMX</a>",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: ({ rawHtml }) => rawHtml.toLowerCase().includes("htmx"),
 };

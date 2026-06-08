@@ -6,5 +6,5 @@ export const rule: AchievementRule = {
   group: "favicon_fanatic",
   description: "The head has more than <strong>3</strong> <code>&lt;link rel=\"icon\"&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: ({ doc }) => doc.querySelectorAll('head link[rel="icon"]').length > 3,
 };

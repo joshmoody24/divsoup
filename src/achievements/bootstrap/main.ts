@@ -6,5 +6,6 @@ export const rule: AchievementRule = {
   group: "bootstrap",
   description: "Page contains links to <a href=\"https://getbootstrap.com/\" target=\"_blank\">Bootstrap</a> CSS or JS",
   hierarchy: "standard",
-  evaluate: () => false,
+  evaluate: ({ doc }) =>
+    doc.querySelector('link[href*="bootstrap"], script[src*="bootstrap"]') !== null,
 };
