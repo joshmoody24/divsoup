@@ -217,7 +217,7 @@ export const evaluateLegacyRule = (id: AchievementId, context: AchievementContex
       const videoCount = Array.from(doc.querySelectorAll("video")).filter((video) =>
         Array.from(video.querySelectorAll("source")).some((source) => {
           const src = source.getAttribute("src") ?? "";
-          return src.includes("youtube.com") || src.includes("youtu.be");
+          return isYoutubeUrl(src);
         }),
       ).length;
       const oldEmbedCount = (rawHtml.match(/<param\s+name=["']movie["']\s+value=["'](?:[^"']*?youtu(?:\.be|be\.com)[^"']*?)["']/gi) ?? []).length;
@@ -266,12 +266,12 @@ const hasStyleAttribute = (doc: Document): boolean =>
 const countUniqueExternalDomains = (doc: Document): number => {
   const domains = new Set<string>();
   for (const link of Array.from(doc.querySelectorAll("a[href]"))) {
-    const href = link.getAttribute("href") ?? "";
-    if (href.startsWith("javascript:") || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("#")) continue;
+    const href = (link.getAttribute("href") ?? "").trim();
+    if (/^(javascript|mailto|tel|data|vbscript):/i.test(href) || href.startsWith("#")) continue;
     if (!href.includes("://") && !href.startsWith("//")) continue;
-    if (!(href.startsWith("http://") || href.startsWith("https://") || href.startsWith("//"))) continue;
     try {
       const url = new URL(href.startsWith("//") ? `https:${href}` : href);
+      if (!["http:", "https:"].includes(url.protocol)) continue;
       if (url.hostname) domains.add(url.hostname);
     } catch {
       // ignore invalid URLs
@@ -292,6 +292,18 @@ const detectWebFrameworks = (doc: Document): string[] => {
 };
 
 const containsCustomElement = (rawHtml: string): boolean => /<([A-Za-z0-9]+-[A-Za-z0-9]+)(\s+[^>]*)?>.*<\/\1>/s.test(rawHtml);
+
+const isYoutubeUrl = (value: string): boolean => {
+  const normalized = value.trim();
+  if (!normalized) return false;
+  try {
+    const url = new URL(normalized.startsWith("//") ? `https:${normalized}` : normalized, "https://example.com");
+    const hostname = url.hostname.toLowerCase();
+    return hostname === "youtube.com" || hostname.endsWith(".youtube.com") || hostname === "youtu.be" || hostname.endsWith(".youtu.be");
+  } catch {
+    return false;
+  }
+};
 
 const longestSingleChildChain = (element: Element): number => {
   const childElements = Array.from(element.children);
