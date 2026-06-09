@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "lorem_ipsum.main",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "lorem_ipsum",
   description: '<i>Pagina locutionem "lorem ipsum" continet</i>',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("lorem_ipsum.main", context),
+  evaluate: ({ doc }) => (doc.body?.textContent ?? "").toLowerCase().includes("lorem ipsum"),
 };

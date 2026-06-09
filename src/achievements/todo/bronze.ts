@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "todo.bronze",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code>",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("todo.bronze", context),
+  evaluate: ({ rawHtml }) => rawHtml.toUpperCase().includes("TODO"),
 };

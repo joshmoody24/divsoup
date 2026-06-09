@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "type_hints.natural_language_static_typing",
@@ -7,5 +6,6 @@ export const rule: AchievementRule = {
   group: "semistatic_types",
   description: 'At least one text input (or textarea) has <code>spellcheck="true"</code>',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("type_hints.natural_language_static_typing", context),
+  evaluate: ({ doc }) =>
+    doc.querySelector('input[spellcheck="true"], textarea[spellcheck="true"]') !== null,
 };

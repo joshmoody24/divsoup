@@ -1,4 +1,14 @@
-// src/achievements/evaluate.ts
+// src/achievements/anarchic_style_sheets/main.ts
+var rule = {
+  id: "anarchic_style_sheets.main",
+  title: "Anarchic Style Sheets",
+  group: "anarchic_style_sheets",
+  description: "Page has <strong>#{@required_styles}</strong> or more <code>&lt;style&gt;</code> elements scattered within the <code>&lt;body&gt;</code>",
+  hierarchy: "standard",
+  evaluate: ({ doc }) => doc.querySelectorAll("body style").length >= 3
+};
+
+// src/achievements/utils.ts
 var ALL_HTML_ELEMENTS = [
   "a",
   "abbr",
@@ -215,260 +225,6 @@ var COLOR_KEYWORDS = {
   dimgrey: "#696969",
   slategray: "#708090",
   slategrey: "#708090"
-};
-var evaluateRule = (id, context) => {
-  const { doc, rawHtml } = context;
-  switch (id) {
-    case "anarchic_style_sheets.main":
-      return doc.querySelectorAll("body style").length >= 3;
-    case "ascii_art.main":
-      return hasAsciiArtComment(rawHtml);
-    case "backwards_compatibility.main":
-      return /<!--\s*\[\s*if\s+IE\s*\].*?<!\[endif\]\s*-->/is.test(rawHtml);
-    case "bigheaded.main":
-      return doc.querySelectorAll("head *").length >= 25;
-    case "bind_person_hater.main": {
-      const imgs = Array.from(doc.querySelectorAll("img"));
-      const missingAltCount = imgs.filter((img) => {
-        const alt = img.getAttribute("alt");
-        return alt === null || alt === "";
-      }).length;
-      const ariaPresent = Array.from(doc.querySelectorAll("*")).some(
-        (el) => Array.from(el.attributes).some((attr) => attr.name.startsWith("aria-"))
-      );
-      const missingAlt = imgs.length > 0 && missingAltCount > imgs.length / 2;
-      return missingAlt && !ariaPresent;
-    }
-    case "bob_ross.main":
-      return doc.querySelector("canvas, picture") !== null;
-    case "bullet_hell.main": {
-      const htmlLists = doc.querySelectorAll("ul, ol").length;
-      const bulletElements = Array.from(
-        doc.querySelectorAll("p, div, span, h1, h2, h3, h4, h5, h6")
-      ).map((el) => (el.textContent ?? "").trim()).filter((text) => BULLET_CHARS.some((bullet) => text.startsWith(bullet)));
-      const textWithBullets = Array.from(doc.querySelectorAll("*:not(ul):not(ol):not(li)")).map((el) => el.textContent ?? "").some((text) => {
-        const bulletLines = text.split(/\r?\n/).map((line) => line.trim()).filter((line) => BULLET_CHARS.some((bullet) => line.startsWith(bullet)));
-        return bulletLines.length >= 2;
-      });
-      return (bulletElements.length >= 2 || textWithBullets) && htmlLists === 0;
-    }
-    case "class_warfare.main":
-      return Array.from(doc.querySelectorAll("*[class]")).some(
-        (el) => (el.getAttribute("class") ?? "").trim().split(/\s+/).filter(Boolean).length > 50
-      );
-    case "classy.bronze":
-      return getClassRatio(doc, rawHtml) > 0.1;
-    case "classy.silver":
-      return getClassRatio(doc, rawHtml) > 0.25;
-    case "classy.gold":
-      return getClassRatio(doc, rawHtml) > 0.333;
-    case "classy.platinum":
-      return getClassRatio(doc, rawHtml) > 0.5;
-    case "data_driven.main":
-      return Array.from(doc.querySelectorAll("*")).filter(
-        (el) => Array.from(el.attributes).some((attr) => attr.name.startsWith("data-"))
-      ).length > 8;
-    case "dictionary_enthusiast.main":
-      return doc.querySelector("dfn") !== null || doc.querySelector("dl dt") !== null && doc.querySelector("dl dd") !== null;
-    case "div_soup.bronze":
-      return getDivRatio(doc) > 0.25;
-    case "div_soup.silver":
-      return getDivRatio(doc) > 0.5;
-    case "div_soup.gold":
-      return getDivRatio(doc) > 0.75;
-    case "div_soup.platinum":
-      return getDivRatio(doc) > 0.9;
-    case "dynamic_content.main":
-      return doc.querySelector("output") !== null;
-    case "empty_calories.main":
-      return Array.from(doc.querySelectorAll("div, span")).filter(
-        (el) => el.children.length === 0 && (el.textContent ?? "").trim() === ""
-      ).length >= 10;
-    case "flashbang.gold": {
-      if (hasDarkModeSupport(doc, rawHtml)) return false;
-      const bg = extractBackgroundColor(doc, rawHtml);
-      return bg !== null && calculateBrightness(bg) > 0.85;
-    }
-    case "flashbang.platinum": {
-      const lightInDark = hasLightInDarkMode(doc, rawHtml);
-      const darkInLight = hasDarkInLightMode(doc, rawHtml);
-      return lightInDark || darkInLight;
-    }
-    case "framework_phobia.main": {
-      const frameworks = detectWebFrameworks(doc);
-      return containsCustomElement(rawHtml) && frameworks.length === 0;
-    }
-    case "hyperlink_collector.bronze":
-      return countUniqueExternalDomains(doc) >= 5;
-    case "hyperlink_collector.silver":
-      return countUniqueExternalDomains(doc) >= 10;
-    case "hyperlink_collector.gold":
-      return countUniqueExternalDomains(doc) >= 25;
-    case "hyperlink_collector.platinum":
-      return countUniqueExternalDomains(doc) >= 50;
-    case "impa.main":
-      return /\.attachShadow\s*\(|<template\s+[^>]*shadowroot\s*=\s*["'](?:open|closed)["'][^>]*>/i.test(
-        rawHtml
-      );
-    case "important_person.main":
-      return (rawHtml.match(/!important/g) ?? []).length >= 10;
-    case "locality_of_appearance.main":
-      return attrContentLength(doc, "style") > attrContentLength(doc, "class");
-    case "lorem_ipsum.main":
-      return (doc.body?.textContent ?? "").toLowerCase().includes("lorem ipsum");
-    case "master_of_elements.bronze":
-      return countValidElementsUsed(doc) >= 17;
-    case "master_of_elements.silver":
-      return countValidElementsUsed(doc) >= 60;
-    case "master_of_elements.gold":
-      return countValidElementsUsed(doc) >= 118;
-    case "master_of_elements.platinum":
-      return missingHtmlElements(doc).size === 0;
-    case "millionth_visitor.main":
-      return doc.querySelector("blink, marquee") !== null;
-    case "ok_boomer.main":
-      return Array.from(DEPRECATED_ELEMENTS).some((tag) => doc.querySelector(tag) !== null);
-    case "oops_all_frameworks.main": {
-      const frameworks = detectWebFrameworks(doc);
-      return ["React", "Vue", "Angular"].every((framework) => frameworks.includes(framework));
-    }
-    case "phd_purist.main":
-      return Array.from(doc.querySelectorAll("math")).some(
-        (math) => math.children.length >= 5 || math.querySelector("mfrac, msqrt, mroot, msubsup, munderover, mtable") !== null
-      );
-    case "preemptive_strike.main":
-      return Array.from(doc.querySelectorAll("link")).some((link) => {
-        const rel = (link.getAttribute("rel") ?? "").toLowerCase();
-        return rel.includes("preload") || rel.includes("dns-prefetch") || rel.includes("preconnect");
-      });
-    case "progressive.main":
-      return doc.querySelector("progress") !== null && doc.querySelector("meter") !== null;
-    case "quirky.main":
-      return !/<!DOCTYPE html>/i.test(rawHtml);
-    case "regressive_enhancement.main":
-      return Array.from(doc.querySelectorAll("noscript")).some(
-        (el) => (el.textContent ?? "").replace(/\s/g, "").length < 100
-      );
-    case "scriptonite.silver":
-      return doc.querySelector("script") === null && !hasOnAttribute(doc);
-    case "scriptonite.gold":
-      return doc.querySelector("script") === null && !hasOnAttribute(doc) && !hasStyleAttribute(doc) && doc.querySelector('style, link[rel="stylesheet"], img') === null;
-    case "scriptonite.platinum": {
-      const hasAnyTags = rawHtml.includes("<") && rawHtml.includes(">");
-      if (!hasAnyTags) return true;
-      const html = doc.documentElement;
-      if (!html) return false;
-      const body = doc.body;
-      const head = doc.head;
-      if (!body || !head) return false;
-      if (body.children.length !== 1 || body.firstElementChild?.tagName.toLowerCase() !== "pre")
-        return false;
-      const pre = body.firstElementChild;
-      if (!pre) return false;
-      const preAttrsOk = Array.from(pre.attributes).every((attr) => attr.name === "style");
-      const headOk = Array.from(head.children).every(
-        (child) => child.tagName.toLowerCase() === "meta"
-      );
-      return preAttrsOk && headOk && html.tagName.toLowerCase() === "html";
-    }
-    case "self_love.main":
-      return doc.querySelector('a[href="#"]') !== null;
-    case "semantic_snob.gold":
-      return ["header", "nav", "main", "article", "section", "aside", "footer"].every(
-        (tag) => doc.querySelector(tag) !== null
-      );
-    case "semantic_snob.platinum":
-      return ["header", "nav", "main", "article", "section", "aside", "footer"].every(
-        (tag) => doc.querySelector(tag) !== null
-      ) && doc.querySelector("div, span") === null;
-    case "slot_machine.main":
-      return doc.querySelector("template slot + slot + slot") !== null;
-    case "small_data.main":
-      return doc.querySelector(
-        'script[type="application/ld+json"], [itemscope], [itemtype], [itemprop]'
-      ) !== null;
-    case "soap_box.main":
-      return Array.from(rawHtml.matchAll(/<!--([\s\S]*?)-->/g)).some(
-        (match) => match[1].trim().split(/\s+/).filter(Boolean).length > 100
-      );
-    case "test_in_prod.main":
-      return /console\.log\s*\(/.test(rawHtml);
-    case "todo.bronze":
-      return rawHtml.toUpperCase().includes("TODO");
-    case "todo.silver":
-      return rawHtml.toLowerCase().split("todo").length >= 3;
-    case "todo.gold":
-      return rawHtml.toLowerCase().split("todo").length >= 12;
-    case "too_meta.main":
-      return doc.querySelectorAll("head meta").length >= 8;
-    case "tower_of_babel.main":
-      return new Set(
-        Array.from(doc.querySelectorAll("*[lang]")).map((el) => el.getAttribute("lang") ?? "").filter(Boolean)
-      ).size >= 2;
-    case "tree_shenanigans.deep_puddle": {
-      if (!doc.body) return false;
-      return longestSingleChildChain(doc.body) >= 8;
-    }
-    case "tree_shenanigans.shallow_ocean": {
-      if (!doc.body) return false;
-      const depths = collectDepths(doc.body, 1);
-      if (depths.length === 0) return false;
-      return depths.reduce((sum, depth) => sum + depth, 0) / depths.length <= 3;
-    }
-    case "type_hints.natural_language_static_typing":
-      return doc.querySelector('input[spellcheck="true"], textarea[spellcheck="true"]') !== null;
-    case "type_hints.type_hints":
-      return doc.querySelector("datalist") !== null;
-    case "vintage.main":
-      return doc.querySelector("table table") !== null;
-    case "void_elements.open_minded": {
-      const result = analyzeVoidElements(rawHtml);
-      return result.total > 0 && result.withoutSlash === result.total;
-    }
-    case "void_elements.double_minded": {
-      const result = analyzeVoidElements(rawHtml);
-      return result.total >= 2 && result.withSlash > 0 && result.withoutSlash > 0;
-    }
-    case "void_elements.close_minded": {
-      const result = analyzeVoidElements(rawHtml);
-      return result.total > 0 && result.withSlash === result.total;
-    }
-    case "we_do_things_a_little_different.main":
-      return Array.from(doc.querySelectorAll("span")).some(
-        (span) => span.querySelector("div") !== null
-      );
-    case "web_1_0_certified.main":
-      return /<!DOCTYPE\s+HTML\s+PUBLIC\s+"-\/\/W3C\/\/DTD\s+HTML\s+3\.2(\s+Final)?\/\/EN"/i.test(
-        rawHtml
-      );
-    case "you_are_amazing_embed.main":
-      return doc.querySelector("object, embed, iframe") !== null;
-    case "youtube_junkie.main": {
-      const iframeCount = doc.querySelectorAll(
-        "iframe[src*='youtube.com'], iframe[src*='youtu.be']"
-      ).length;
-      const objectCount = doc.querySelectorAll(
-        "object[data*='youtube.com'], object[data*='youtu.be']"
-      ).length;
-      const embedCount = doc.querySelectorAll(
-        "embed[src*='youtube.com'], embed[src*='youtu.be']"
-      ).length;
-      const videoCount = Array.from(doc.querySelectorAll("video")).filter(
-        (video) => Array.from(video.querySelectorAll("source")).some((source) => {
-          const src = source.getAttribute("src") ?? "";
-          return isYoutubeUrl(src);
-        })
-      ).length;
-      const oldEmbedCount = (rawHtml.match(
-        /<param\s+name=["']movie["']\s+value=["'](?:[^"']*?youtu(?:\.be|be\.com)[^"']*?)["']/gi
-      ) ?? []).length;
-      return iframeCount + objectCount + embedCount + videoCount + oldEmbedCount >= 3;
-    }
-    case "zalgo.main":
-      return /[^\p{M}][\p{M}]{3,}/u.test(rawHtml);
-    default:
-      return false;
-  }
 };
 var getClassRatio = (doc, rawHtml) => {
   const classesSize = Array.from(doc.querySelectorAll("*[class]")).map((el) => el.getAttribute("class") ?? "").join(" ").length;
@@ -747,16 +503,6 @@ var isLikelyCodeComment = (comment) => {
   return alphaNumCount / noWhitespace.length > 0.7;
 };
 
-// src/achievements/anarchic_style_sheets/main.ts
-var rule = {
-  id: "anarchic_style_sheets.main",
-  title: "Anarchic Style Sheets",
-  group: "anarchic_style_sheets",
-  description: "Page has <strong>#{@required_styles}</strong> or more <code>&lt;style&gt;</code> elements scattered within the <code>&lt;body&gt;</code>",
-  hierarchy: "standard",
-  evaluate: (context) => evaluateRule("anarchic_style_sheets.main", context)
-};
-
 // src/achievements/ascii_art/main.ts
 var rule2 = {
   id: "ascii_art.main",
@@ -764,7 +510,7 @@ var rule2 = {
   group: "ascii_art",
   description: "Page contains an ASCII art HTML <code>&lt;!-- comment --&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("ascii_art.main", context)
+  evaluate: ({ rawHtml }) => hasAsciiArtComment(rawHtml)
 };
 
 // src/achievements/backwards_compatibility/main.ts
@@ -774,7 +520,7 @@ var rule3 = {
   group: "backwards_compatibility",
   description: "Page contains an <code>&lt;!--[if IE]&gt;...&lt;![endif]--&gt;</code> comment",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("backwards_compatibility.main", context)
+  evaluate: ({ rawHtml }) => /<!--\s*\[\s*if\s+IE\s*\].*?<!\[endif\]\s*-->/is.test(rawHtml)
 };
 
 // src/achievements/bigheaded/main.ts
@@ -784,7 +530,7 @@ var rule4 = {
   group: "bigheaded",
   description: "Page <code>&lt;head&gt;</code> contains <strong>25</strong> or more elements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("bigheaded.main", context)
+  evaluate: ({ doc }) => doc.querySelectorAll("head *").length >= 25
 };
 
 // src/achievements/bind_person_hater/main.ts
@@ -794,7 +540,18 @@ var rule5 = {
   group: "blind_person_hater",
   description: "Majority of images lack <code>alt</code> attributes and/or no ARIA attributes appear on the page",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("bind_person_hater.main", context)
+  evaluate: ({ doc }) => {
+    const imgs = Array.from(doc.querySelectorAll("img"));
+    const missingAltCount = imgs.filter((img) => {
+      const alt = img.getAttribute("alt");
+      return alt === null || alt === "";
+    }).length;
+    const ariaPresent = Array.from(doc.querySelectorAll("*")).some(
+      (el) => Array.from(el.attributes).some((attr) => attr.name.startsWith("aria-"))
+    );
+    const missingAlt = imgs.length > 0 && missingAltCount > imgs.length / 2;
+    return missingAlt && !ariaPresent;
+  }
 };
 
 // src/achievements/bob_ross/main.ts
@@ -804,7 +561,7 @@ var rule6 = {
   group: "bob_ross",
   description: "Page includes a <code>&lt;canvas&gt;</code> or <code>&lt;picture&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("bob_ross.main", context)
+  evaluate: ({ doc }) => doc.querySelector("canvas, picture") !== null
 };
 
 // src/achievements/bootstrap/main.ts
@@ -824,7 +581,15 @@ var rule8 = {
   group: "bullet_hell",
   description: "Page uses unicode bullet points (\u2022 \u25C6 \u2605) to create a list instead of using <code>&lt;ul&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("bullet_hell.main", context)
+  evaluate: ({ doc }) => {
+    const htmlLists = doc.querySelectorAll("ul, ol").length;
+    const bulletElements = Array.from(doc.querySelectorAll("p, div, span, h1, h2, h3, h4, h5, h6")).map((el) => (el.textContent ?? "").trim()).filter((text) => BULLET_CHARS.some((bullet) => text.startsWith(bullet)));
+    const textWithBullets = Array.from(doc.querySelectorAll("*:not(ul):not(ol):not(li)")).map((el) => el.textContent ?? "").some((text) => {
+      const bulletLines = text.split(/\r?\n/).map((line) => line.trim()).filter((line) => BULLET_CHARS.some((bullet) => line.startsWith(bullet)));
+      return bulletLines.length >= 2;
+    });
+    return (bulletElements.length >= 2 || textWithBullets) && htmlLists === 0;
+  }
 };
 
 // src/achievements/class_warfare/main.ts
@@ -834,7 +599,9 @@ var rule9 = {
   group: "class_warfare",
   description: "Page includes an element with more than <strong>50</strong> classes",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("class_warfare.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("*[class]")).some(
+    (el) => (el.getAttribute("class") ?? "").trim().split(/\s+/).filter(Boolean).length > 50
+  )
 };
 
 // src/achievements/classy/bronze.ts
@@ -844,7 +611,7 @@ var rule10 = {
   group: "classy",
   description: "HTML <code>class</code> attributes make up more than <strong>10%</strong> of the page's size",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("classy.bronze", context)
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.1
 };
 
 // src/achievements/classy/gold.ts
@@ -854,7 +621,7 @@ var rule11 = {
   group: "classy",
   description: "HTML <code>class</code> attributes make up more than <strong>one third</strong> of the page's size",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("classy.gold", context)
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.333
 };
 
 // src/achievements/classy/platinum.ts
@@ -864,7 +631,7 @@ var rule12 = {
   group: "classy",
   description: "HTML <code>class</code> attributes make up more than <strong>50%</strong> of the page's size",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("classy.platinum", context)
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.5
 };
 
 // src/achievements/classy/silver.ts
@@ -874,7 +641,7 @@ var rule13 = {
   group: "classy",
   description: "HTML <code>class</code> attributes make up more than <strong>25%</strong> of the page's size",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("classy.silver", context)
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.25
 };
 
 // src/achievements/commentator_in_chief/main.ts
@@ -910,7 +677,9 @@ var rule16 = {
   group: "data_driven",
   description: "More than <strong>8</strong> elements on the page have <code>data-</code> attributes",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("data_driven.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("*")).filter(
+    (el) => Array.from(el.attributes).some((attr) => attr.name.startsWith("data-"))
+  ).length > 8
 };
 
 // src/achievements/dictionary_enthusiast/main.ts
@@ -920,7 +689,7 @@ var rule17 = {
   group: "dictionary_enthusiast",
   description: "Page uses definition elements (<code>&lt;dfn&gt;</code> or <code>&lt;dl&gt;</code> with <code>&lt;dt&gt;</code> and <code>&lt;dd&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("dictionary_enthusiast.main", context)
+  evaluate: ({ doc }) => doc.querySelector("dfn") !== null || doc.querySelector("dl dt") !== null && doc.querySelector("dl dd") !== null
 };
 
 // src/achievements/div_soup/bronze.ts
@@ -930,7 +699,7 @@ var rule18 = {
   group: "div_soup",
   description: "More than <strong>25%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("div_soup.bronze", context)
+  evaluate: ({ doc }) => getDivRatio(doc) > 0.25
 };
 
 // src/achievements/div_soup/gold.ts
@@ -940,7 +709,7 @@ var rule19 = {
   group: "div_soup",
   description: "More than <strong>75%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("div_soup.gold", context)
+  evaluate: ({ doc }) => getDivRatio(doc) > 0.75
 };
 
 // src/achievements/div_soup/platinum.ts
@@ -950,7 +719,7 @@ var rule20 = {
   group: "div_soup",
   description: "More than <strong>90%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("div_soup.platinum", context)
+  evaluate: ({ doc }) => getDivRatio(doc) > 0.9
 };
 
 // src/achievements/div_soup/silver.ts
@@ -960,7 +729,7 @@ var rule21 = {
   group: "div_soup",
   description: "More than <strong>50%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("div_soup.silver", context)
+  evaluate: ({ doc }) => getDivRatio(doc) > 0.5
 };
 
 // src/achievements/dynamic_content/main.ts
@@ -970,7 +739,7 @@ var rule22 = {
   group: "dynamic_content",
   description: "Page uses an <code>&lt;output&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("dynamic_content.main", context)
+  evaluate: ({ doc }) => doc.querySelector("output") !== null
 };
 
 // src/achievements/empty_calories/main.ts
@@ -980,7 +749,9 @@ var rule23 = {
   group: "empty_calories",
   description: "Page contains <strong>10</strong> or more empty <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("empty_calories.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("div, span")).filter(
+    (el) => el.children.length === 0 && (el.textContent ?? "").trim() === ""
+  ).length >= 10
 };
 
 // src/achievements/favicon_fanatic/main.ts
@@ -1000,7 +771,11 @@ var rule25 = {
   group: "seared_retinas",
   description: "The primary background color is <strong>light</strong> when the user prefers <strong>dark mode</strong>",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("flashbang.gold", context)
+  evaluate: ({ doc, rawHtml }) => {
+    if (hasDarkModeSupport(doc, rawHtml)) return false;
+    const bg = extractBackgroundColor(doc, rawHtml);
+    return bg !== null && calculateBrightness(bg) > 0.85;
+  }
 };
 
 // src/achievements/flashbang/platinum.ts
@@ -1010,7 +785,11 @@ var rule26 = {
   group: "seared_retinas",
   description: "The primary background color is light when the user prefers dark mode and dark when the user prefers light mode",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("flashbang.platinum", context)
+  evaluate: ({ doc, rawHtml }) => {
+    const lightInDark = hasLightInDarkMode(doc, rawHtml);
+    const darkInLight = hasDarkInLightMode(doc, rawHtml);
+    return lightInDark || darkInLight;
+  }
 };
 
 // src/achievements/form_fanatic/main.ts
@@ -1049,7 +828,10 @@ var rule28 = {
   group: "framework_phobia",
   description: "Page contains a custom HTML element and does not use a JS framework",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("framework_phobia.main", context)
+  evaluate: ({ doc, rawHtml }) => {
+    const frameworks = detectWebFrameworks(doc);
+    return containsCustomElement(rawHtml) && frameworks.length === 0;
+  }
 };
 
 // src/achievements/htmx/main.ts
@@ -1079,7 +861,7 @@ var rule31 = {
   group: "hyperlink_collector",
   description: "Page contains links to at least <strong>#{@min_domains}</strong> different external domains",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("hyperlink_collector.bronze", context)
+  evaluate: ({ doc }) => countUniqueExternalDomains(doc) >= 5
 };
 
 // src/achievements/hyperlink_collector/gold.ts
@@ -1089,7 +871,7 @@ var rule32 = {
   group: "hyperlink_collector",
   description: "Page contains links to at least <strong>#{@min_domains}</strong> different external domains",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("hyperlink_collector.gold", context)
+  evaluate: ({ doc }) => countUniqueExternalDomains(doc) >= 25
 };
 
 // src/achievements/hyperlink_collector/platinum.ts
@@ -1099,7 +881,7 @@ var rule33 = {
   group: "hyperlink_collector",
   description: "Page contains links to at least <strong>#{@min_domains}</strong> different external domains",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("hyperlink_collector.platinum", context)
+  evaluate: ({ doc }) => countUniqueExternalDomains(doc) >= 50
 };
 
 // src/achievements/hyperlink_collector/silver.ts
@@ -1109,7 +891,7 @@ var rule34 = {
   group: "hyperlink_collector",
   description: "Page contains links to at least <strong>#{@min_domains}</strong> different external domains",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("hyperlink_collector.silver", context)
+  evaluate: ({ doc }) => countUniqueExternalDomains(doc) >= 10
 };
 
 // src/achievements/impa/main.ts
@@ -1119,7 +901,9 @@ var rule35 = {
   group: "impa",
   description: "Page uses the Shadow DOM",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("impa.main", context)
+  evaluate: ({ rawHtml }) => /\.attachShadow\s*\(|<template\s+[^>]*shadowroot\s*=\s*["'](?:open|closed)["'][^>]*>/i.test(
+    rawHtml
+  )
 };
 
 // src/achievements/important_person/main.ts
@@ -1129,7 +913,7 @@ var rule36 = {
   group: "important_person",
   description: "The phrase <code>!important</code> appears <strong>10</strong> or more times on the page",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("important_person.main", context)
+  evaluate: ({ rawHtml }) => (rawHtml.match(/!important/g) ?? []).length >= 10
 };
 
 // src/achievements/locality_of_appearance/main.ts
@@ -1139,7 +923,7 @@ var rule37 = {
   group: "locality_of_appearance",
   description: "Page has more CSS in <code>style</code> attributes than <code>class</code> attributes",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("locality_of_appearance.main", context)
+  evaluate: ({ doc }) => attrContentLength(doc, "style") > attrContentLength(doc, "class")
 };
 
 // src/achievements/lorem_ipsum/main.ts
@@ -1149,7 +933,7 @@ var rule38 = {
   group: "lorem_ipsum",
   description: '<i>Pagina locutionem "lorem ipsum" continet</i>',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("lorem_ipsum.main", context)
+  evaluate: ({ doc }) => (doc.body?.textContent ?? "").toLowerCase().includes("lorem ipsum")
 };
 
 // src/achievements/master_of_elements/bronze.ts
@@ -1159,7 +943,7 @@ var rule39 = {
   group: "master_of_elements",
   description: "Page uses at least <strong>#{@required_elements}</strong> different HTML elements",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("master_of_elements.bronze", context)
+  evaluate: ({ doc }) => countValidElementsUsed(doc) >= 17
 };
 
 // src/achievements/master_of_elements/gold.ts
@@ -1169,7 +953,7 @@ var rule40 = {
   group: "master_of_elements",
   description: "Page uses at least <strong>#{@required_elements}</strong> different HTML elements",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("master_of_elements.gold", context)
+  evaluate: ({ doc }) => countValidElementsUsed(doc) >= 118
 };
 
 // src/achievements/master_of_elements/platinum.ts
@@ -1179,7 +963,7 @@ var rule41 = {
   group: "master_of_elements",
   description: "Page uses <strong>every HTML element</strong>, even the deprecated ones",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("master_of_elements.platinum", context)
+  evaluate: ({ doc }) => missingHtmlElements(doc).size === 0
 };
 
 // src/achievements/master_of_elements/silver.ts
@@ -1189,7 +973,7 @@ var rule42 = {
   group: "master_of_elements",
   description: "Page uses at least <strong>#{@required_elements}</strong> different HTML elements",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("master_of_elements.silver", context)
+  evaluate: ({ doc }) => countValidElementsUsed(doc) >= 60
 };
 
 // src/achievements/millionth_visitor/main.ts
@@ -1199,7 +983,7 @@ var rule43 = {
   group: "millionth_visitor",
   description: "Page uses a <code>&lt;blink&gt;</code> or <code>&lt;marquee&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("millionth_visitor.main", context)
+  evaluate: ({ doc }) => doc.querySelector("blink, marquee") !== null
 };
 
 // src/achievements/ok_boomer/main.ts
@@ -1209,7 +993,7 @@ var rule44 = {
   group: "ok_boomer",
   description: "Page uses a deprecated HTML element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("ok_boomer.main", context)
+  evaluate: ({ doc }) => Array.from(DEPRECATED_ELEMENTS).some((tag) => doc.querySelector(tag) !== null)
 };
 
 // src/achievements/oops_all_frameworks/main.ts
@@ -1219,7 +1003,10 @@ var rule45 = {
   group: "oops_all_frameworks",
   description: "Page uses React, Vue, and Angular simultaneously",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("oops_all_frameworks.main", context)
+  evaluate: ({ doc }) => {
+    const frameworks = detectWebFrameworks(doc);
+    return ["React", "Vue", "Angular"].every((framework) => frameworks.includes(framework));
+  }
 };
 
 // src/achievements/phd_purist/main.ts
@@ -1229,7 +1016,9 @@ var rule46 = {
   group: "phd_purist",
   description: "Use the <code>&lt;math&gt;</code> element for something nontrivial",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("phd_purist.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("math")).some(
+    (math) => math.children.length >= 5 || math.querySelector("mfrac, msqrt, mroot, msubsup, munderover, mtable") !== null
+  )
 };
 
 // src/achievements/preemptive_strike/main.ts
@@ -1239,7 +1028,10 @@ var rule47 = {
   group: "preemptive_strike",
   description: 'Page includes a <code>&lt;link rel="preload"&gt;</code>, <code>&lt;link rel="dns-prefetch"&gt;</code>, or <code>&lt;link rel="preconnect"&gt;</code>',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("preemptive_strike.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("link")).some((link) => {
+    const rel = (link.getAttribute("rel") ?? "").toLowerCase();
+    return rel.includes("preload") || rel.includes("dns-prefetch") || rel.includes("preconnect");
+  })
 };
 
 // src/achievements/progressive/main.ts
@@ -1249,7 +1041,7 @@ var rule48 = {
   group: "progressive",
   description: "Page contains both a <code>&lt;progress&gt;</code> and <code>&lt;meter&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("progressive.main", context)
+  evaluate: ({ doc }) => doc.querySelector("progress") !== null && doc.querySelector("meter") !== null
 };
 
 // src/achievements/quirky/main.ts
@@ -1259,7 +1051,7 @@ var rule49 = {
   group: "quirky",
   description: "Page renders in quirks mode",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("quirky.main", context)
+  evaluate: ({ rawHtml }) => !/<!DOCTYPE html>/i.test(rawHtml)
 };
 
 // src/achievements/regressive_enhancement/main.ts
@@ -1269,7 +1061,9 @@ var rule50 = {
   group: "regressive_enhancement",
   description: "Page includes a <code>&lt;noscript&gt;</code> element with barely anything in it",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("regressive_enhancement.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("noscript")).some(
+    (el) => (el.textContent ?? "").replace(/\s/g, "").length < 100
+  )
 };
 
 // src/achievements/scriptonite/gold.ts
@@ -1279,7 +1073,7 @@ var rule51 = {
   group: "the_web_is_for_documents",
   description: "No JavaScript, CSS, or images appear in the page",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("scriptonite.gold", context)
+  evaluate: ({ doc }) => doc.querySelector("script") === null && !hasOnAttribute(doc) && !hasStyleAttribute(doc) && doc.querySelector('style, link[rel="stylesheet"], img') === null
 };
 
 // src/achievements/scriptonite/platinum.ts
@@ -1289,7 +1083,24 @@ var rule52 = {
   group: "the_web_is_for_documents",
   description: "Page is entirely plaintext - no CSS, JavaScript, or HTML elements",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("scriptonite.platinum", context)
+  evaluate: ({ doc, rawHtml }) => {
+    const hasAnyTags = rawHtml.includes("<") && rawHtml.includes(">");
+    if (!hasAnyTags) return true;
+    const html = doc.documentElement;
+    if (!html) return false;
+    const body = doc.body;
+    const head = doc.head;
+    if (!body || !head) return false;
+    if (body.children.length !== 1 || body.firstElementChild?.tagName.toLowerCase() !== "pre")
+      return false;
+    const pre = body.firstElementChild;
+    if (!pre) return false;
+    const preAttrsOk = Array.from(pre.attributes).every((attr) => attr.name === "style");
+    const headOk = Array.from(head.children).every(
+      (child) => child.tagName.toLowerCase() === "meta"
+    );
+    return preAttrsOk && headOk && html.tagName.toLowerCase() === "html";
+  }
 };
 
 // src/achievements/scriptonite/silver.ts
@@ -1299,7 +1110,7 @@ var rule53 = {
   group: "the_web_is_for_documents",
   description: "No <code>&lt;script&gt;</code> tags or <code>on</code> attributes appear in the page",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("scriptonite.silver", context)
+  evaluate: ({ doc }) => doc.querySelector("script") === null && !hasOnAttribute(doc)
 };
 
 // src/achievements/self_love/main.ts
@@ -1309,7 +1120,7 @@ var rule54 = {
   group: "self_love",
   description: 'Page contains an <code>&lt;a href="#"&gt;</code> element',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("self_love.main", context)
+  evaluate: ({ doc }) => doc.querySelector('a[href="#"]') !== null
 };
 
 // src/achievements/semantic_snob/gold.ts
@@ -1319,7 +1130,9 @@ var rule55 = {
   group: "semantics",
   description: "Page uses each of the following elements: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;article&gt;</code>, <code>&lt;section&gt;</code>, <code>&lt;aside&gt;</code>, <code>&lt;footer&gt;</code>",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("semantic_snob.gold", context)
+  evaluate: ({ doc }) => ["header", "nav", "main", "article", "section", "aside", "footer"].every(
+    (tag) => doc.querySelector(tag) !== null
+  )
 };
 
 // src/achievements/semantic_snob/platinum.ts
@@ -1329,7 +1142,9 @@ var rule56 = {
   group: "semantics",
   description: "Fulfill the criteria for <strong>Semantic Snob</strong> and also do not use a single <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code>",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("semantic_snob.platinum", context)
+  evaluate: ({ doc }) => ["header", "nav", "main", "article", "section", "aside", "footer"].every(
+    (tag) => doc.querySelector(tag) !== null
+  ) && doc.querySelector("div, span") === null
 };
 
 // src/achievements/seo_sleazeball/main.ts
@@ -1354,7 +1169,7 @@ var rule58 = {
   group: "slot_machine",
   description: "Page uses three <code>&lt;slot&gt;</code> elements in a row in a <code>&lt;template&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("slot_machine.main", context)
+  evaluate: ({ doc }) => doc.querySelector("template slot + slot + slot") !== null
 };
 
 // src/achievements/small_data/main.ts
@@ -1364,7 +1179,7 @@ var rule59 = {
   group: "small_data",
   description: "Page uses <code>JSON-LD</code> or <code>Microdata</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("small_data.main", context)
+  evaluate: ({ doc }) => doc.querySelector('script[type="application/ld+json"], [itemscope], [itemtype], [itemprop]') !== null
 };
 
 // src/achievements/soap_box/main.ts
@@ -1374,7 +1189,9 @@ var rule60 = {
   group: "soap_box",
   description: "Page contains an HTML <code>&lt;!-- comment --&gt;</code> with more than <strong>100</strong> words",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("soap_box.main", context)
+  evaluate: ({ rawHtml }) => Array.from(rawHtml.matchAll(/<!--([\s\S]*?)-->/g)).some(
+    (match) => match[1].trim().split(/\s+/).filter(Boolean).length > 100
+  )
 };
 
 // src/achievements/test_in_prod/main.ts
@@ -1384,7 +1201,7 @@ var rule61 = {
   group: "test_in_prod",
   description: "Page contains <code>console.log</code> statements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("test_in_prod.main", context)
+  evaluate: ({ rawHtml }) => /console\.log\s*\(/.test(rawHtml)
 };
 
 // src/achievements/todo/bronze.ts
@@ -1394,7 +1211,7 @@ var rule62 = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code>",
   hierarchy: "bronze",
-  evaluate: (context) => evaluateRule("todo.bronze", context)
+  evaluate: ({ rawHtml }) => rawHtml.toUpperCase().includes("TODO")
 };
 
 // src/achievements/todo/gold.ts
@@ -1404,7 +1221,7 @@ var rule63 = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code> a <strong>dozen</strong> or more times",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("todo.gold", context)
+  evaluate: ({ rawHtml }) => rawHtml.toLowerCase().split("todo").length >= 12
 };
 
 // src/achievements/todo/silver.ts
@@ -1414,7 +1231,7 @@ var rule64 = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code> at least <strong>3</strong> times",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("todo.silver", context)
+  evaluate: ({ rawHtml }) => rawHtml.toLowerCase().split("todo").length >= 3
 };
 
 // src/achievements/too_meta/main.ts
@@ -1424,7 +1241,7 @@ var rule65 = {
   group: "too_meta",
   description: "Page <code>&lt;head&gt;</code> includes <strong>8+</strong> <code>&lt;meta&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("too_meta.main", context)
+  evaluate: ({ doc }) => doc.querySelectorAll("head meta").length >= 8
 };
 
 // src/achievements/tower_of_babel/main.ts
@@ -1434,7 +1251,9 @@ var rule66 = {
   group: "tower_of_babel",
   description: "Page contains at least <strong>2</strong> <code>lang</code> attributes with different values",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("tower_of_babel.main", context)
+  evaluate: ({ doc }) => new Set(
+    Array.from(doc.querySelectorAll("*[lang]")).map((el) => el.getAttribute("lang") ?? "").filter(Boolean)
+  ).size >= 2
 };
 
 // src/achievements/tree_shenanigans/deep_puddle.ts
@@ -1444,7 +1263,10 @@ var rule67 = {
   group: "tree_shenanigans",
   description: "The page body contains a descendant chain of at least <strong>#{@min_chain_length}</strong> elements \\\n        where each parent has only one child",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("tree_shenanigans.deep_puddle", context)
+  evaluate: ({ doc }) => {
+    if (!doc.body) return false;
+    return longestSingleChildChain(doc.body) >= 8;
+  }
 };
 
 // src/achievements/tree_shenanigans/shallow_ocean.ts
@@ -1454,7 +1276,12 @@ var rule68 = {
   group: "tree_shenanigans",
   description: "Average depth of all elements inside <code>&lt;body&gt</code> is <strong>#{@max_avg_depth}</strong> or less",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("tree_shenanigans.shallow_ocean", context)
+  evaluate: ({ doc }) => {
+    if (!doc.body) return false;
+    const depths = collectDepths(doc.body, 1);
+    if (depths.length === 0) return false;
+    return depths.reduce((sum, depth) => sum + depth, 0) / depths.length <= 3;
+  }
 };
 
 // src/achievements/type_hints/natural_language_static_typing.ts
@@ -1464,7 +1291,7 @@ var rule69 = {
   group: "semistatic_types",
   description: 'At least one text input (or textarea) has <code>spellcheck="true"</code>',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("type_hints.natural_language_static_typing", context)
+  evaluate: ({ doc }) => doc.querySelector('input[spellcheck="true"], textarea[spellcheck="true"]') !== null
 };
 
 // src/achievements/type_hints/type_hints.ts
@@ -1474,7 +1301,7 @@ var rule70 = {
   group: "semistatic_types",
   description: "Page uses a <code>&lt;datalist&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("type_hints.type_hints", context)
+  evaluate: ({ doc }) => doc.querySelector("datalist") !== null
 };
 
 // src/achievements/vintage/main.ts
@@ -1484,7 +1311,7 @@ var rule71 = {
   group: "vintage",
   description: "Page uses a nested table layout",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("vintage.main", context)
+  evaluate: ({ doc }) => doc.querySelector("table table") !== null
 };
 
 // src/achievements/void_elements/close_minded.ts
@@ -1494,7 +1321,10 @@ var rule72 = {
   group: "void_elements",
   description: "All void elements include a trailing slash (<code>&lt;img /&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("void_elements.close_minded", context)
+  evaluate: ({ rawHtml }) => {
+    const result = analyzeVoidElements(rawHtml);
+    return result.total > 0 && result.withSlash === result.total;
+  }
 };
 
 // src/achievements/void_elements/double_minded.ts
@@ -1504,7 +1334,10 @@ var rule73 = {
   group: "void_elements",
   description: "Some void elements include a trailing slash (<code>&lt;img /&gt;</code>) and some do not (<code>&lt;img&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("void_elements.double_minded", context)
+  evaluate: ({ rawHtml }) => {
+    const result = analyzeVoidElements(rawHtml);
+    return result.total >= 2 && result.withSlash > 0 && result.withoutSlash > 0;
+  }
 };
 
 // src/achievements/void_elements/open_minded.ts
@@ -1514,7 +1347,10 @@ var rule74 = {
   group: "void_elements",
   description: "No void elements include a trailing slash (<code>&lt;img&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("void_elements.open_minded", context)
+  evaluate: ({ rawHtml }) => {
+    const result = analyzeVoidElements(rawHtml);
+    return result.total > 0 && result.withoutSlash === result.total;
+  }
 };
 
 // src/achievements/we_do_things_a_little_different/main.ts
@@ -1524,7 +1360,7 @@ var rule75 = {
   group: "we_do_things_a_little_different",
   description: "Nest a <code>&lt;div&gt;</code> inside a <code>&lt;span&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("we_do_things_a_little_different.main", context)
+  evaluate: ({ doc }) => Array.from(doc.querySelectorAll("span")).some((span) => span.querySelector("div") !== null)
 };
 
 // src/achievements/web_1_0_certified/main.ts
@@ -1534,7 +1370,7 @@ var rule76 = {
   group: "the_good_old_days",
   description: "Page is authored in HTML 3.2",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("web_1_0_certified.main", context)
+  evaluate: ({ rawHtml }) => /<!DOCTYPE\s+HTML\s+PUBLIC\s+"-\/\/W3C\/\/DTD\s+HTML\s+3\.2(\s+Final)?\/\/EN"/i.test(rawHtml)
 };
 
 // src/achievements/you_are_amazing_embed/main.ts
@@ -1544,7 +1380,7 @@ var rule77 = {
   group: "embed",
   description: "Page embeds external content via <code>&lt;object&gt;</code>, <code>&lt;embed&gt;</code>, or <code>&lt;iframe&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("you_are_amazing_embed.main", context)
+  evaluate: ({ doc }) => doc.querySelector("object, embed, iframe") !== null
 };
 
 // src/achievements/youtube_junkie/main.ts
@@ -1554,7 +1390,27 @@ var rule78 = {
   group: "youtube_junkie",
   description: 'Page embeds <strong>#{@required_embeds}</strong> or more <a href="https://youtube.com" target="_blank">YouTube</a> videos',
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("youtube_junkie.main", context)
+  evaluate: ({ doc, rawHtml }) => {
+    const iframeCount = doc.querySelectorAll(
+      "iframe[src*='youtube.com'], iframe[src*='youtu.be']"
+    ).length;
+    const objectCount = doc.querySelectorAll(
+      "object[data*='youtube.com'], object[data*='youtu.be']"
+    ).length;
+    const embedCount = doc.querySelectorAll(
+      "embed[src*='youtube.com'], embed[src*='youtu.be']"
+    ).length;
+    const videoCount = Array.from(doc.querySelectorAll("video")).filter(
+      (video) => Array.from(video.querySelectorAll("source")).some((source) => {
+        const src = source.getAttribute("src") ?? "";
+        return isYoutubeUrl(src);
+      })
+    ).length;
+    const oldEmbedCount = (rawHtml.match(
+      /<param\s+name=["']movie["']\s+value=["'](?:[^"']*?youtu(?:\.be|be\.com)[^"']*?)["']/gi
+    ) ?? []).length;
+    return iframeCount + objectCount + embedCount + videoCount + oldEmbedCount >= 3;
+  }
 };
 
 // src/achievements/zalgo/main.ts
@@ -1564,92 +1420,114 @@ var rule79 = {
   group: "zalgo",
   description: "Page contains <strong>Zalgo text</strong> (corrupted Unicode with combining characters)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("zalgo.main", context)
+  evaluate: ({ rawHtml }) => /[^\p{M}][\p{M}]{3,}/u.test(rawHtml)
+};
+
+// src/achievements/registry.ts
+var createAchievementRegistry = () => {
+  const registeredRules = [];
+  const registeredRulesById = /* @__PURE__ */ new Map();
+  return {
+    get rules() {
+      return [...registeredRules];
+    },
+    get rulesById() {
+      return new Map(registeredRulesById);
+    },
+    register: (rule80) => {
+      const existingRule = registeredRulesById.get(rule80.id);
+      if (existingRule !== void 0) {
+        throw new Error(`Duplicate achievement ID registered: ${rule80.id}`);
+      }
+      registeredRules.push(rule80);
+      registeredRulesById.set(rule80.id, rule80);
+    }
+  };
 };
 
 // src/achievements/index.ts
-var rulesById = {
-  "anarchic_style_sheets.main": rule,
-  "ascii_art.main": rule2,
-  "backwards_compatibility.main": rule3,
-  "bigheaded.main": rule4,
-  "bind_person_hater.main": rule5,
-  "bob_ross.main": rule6,
-  "bootstrap.main": rule7,
-  "bullet_hell.main": rule8,
-  "class_warfare.main": rule9,
-  "classy.bronze": rule10,
-  "classy.gold": rule11,
-  "classy.platinum": rule12,
-  "classy.silver": rule13,
-  "commentator_in_chief.main": rule14,
-  "cross_platform.main": rule15,
-  "data_driven.main": rule16,
-  "dictionary_enthusiast.main": rule17,
-  "div_soup.bronze": rule18,
-  "div_soup.gold": rule19,
-  "div_soup.platinum": rule20,
-  "div_soup.silver": rule21,
-  "dynamic_content.main": rule22,
-  "empty_calories.main": rule23,
-  "favicon_fanatic.main": rule24,
-  "flashbang.gold": rule25,
-  "flashbang.platinum": rule26,
-  "form_fanatic.main": rule27,
-  "framework_phobia.main": rule28,
-  "htmx.main": rule29,
-  "hydra.main": rule30,
-  "hyperlink_collector.bronze": rule31,
-  "hyperlink_collector.gold": rule32,
-  "hyperlink_collector.platinum": rule33,
-  "hyperlink_collector.silver": rule34,
-  "impa.main": rule35,
-  "important_person.main": rule36,
-  "locality_of_appearance.main": rule37,
-  "lorem_ipsum.main": rule38,
-  "master_of_elements.bronze": rule39,
-  "master_of_elements.gold": rule40,
-  "master_of_elements.platinum": rule41,
-  "master_of_elements.silver": rule42,
-  "millionth_visitor.main": rule43,
-  "ok_boomer.main": rule44,
-  "oops_all_frameworks.main": rule45,
-  "phd_purist.main": rule46,
-  "preemptive_strike.main": rule47,
-  "progressive.main": rule48,
-  "quirky.main": rule49,
-  "regressive_enhancement.main": rule50,
-  "scriptonite.gold": rule51,
-  "scriptonite.platinum": rule52,
-  "scriptonite.silver": rule53,
-  "self_love.main": rule54,
-  "semantic_snob.gold": rule55,
-  "semantic_snob.platinum": rule56,
-  "seo_sleazeball.main": rule57,
-  "slot_machine.main": rule58,
-  "small_data.main": rule59,
-  "soap_box.main": rule60,
-  "test_in_prod.main": rule61,
-  "todo.bronze": rule62,
-  "todo.gold": rule63,
-  "todo.silver": rule64,
-  "too_meta.main": rule65,
-  "tower_of_babel.main": rule66,
-  "tree_shenanigans.deep_puddle": rule67,
-  "tree_shenanigans.shallow_ocean": rule68,
-  "type_hints.natural_language_static_typing": rule69,
-  "type_hints.type_hints": rule70,
-  "vintage.main": rule71,
-  "void_elements.close_minded": rule72,
-  "void_elements.double_minded": rule73,
-  "void_elements.open_minded": rule74,
-  "we_do_things_a_little_different.main": rule75,
-  "web_1_0_certified.main": rule76,
-  "you_are_amazing_embed.main": rule77,
-  "youtube_junkie.main": rule78,
-  "zalgo.main": rule79
-};
-var rules = Object.values(rulesById);
+var registry = createAchievementRegistry();
+registry.register(rule);
+registry.register(rule2);
+registry.register(rule3);
+registry.register(rule4);
+registry.register(rule5);
+registry.register(rule6);
+registry.register(rule7);
+registry.register(rule8);
+registry.register(rule9);
+registry.register(rule10);
+registry.register(rule11);
+registry.register(rule12);
+registry.register(rule13);
+registry.register(rule14);
+registry.register(rule15);
+registry.register(rule16);
+registry.register(rule17);
+registry.register(rule18);
+registry.register(rule19);
+registry.register(rule20);
+registry.register(rule21);
+registry.register(rule22);
+registry.register(rule23);
+registry.register(rule24);
+registry.register(rule25);
+registry.register(rule26);
+registry.register(rule27);
+registry.register(rule28);
+registry.register(rule29);
+registry.register(rule30);
+registry.register(rule31);
+registry.register(rule32);
+registry.register(rule33);
+registry.register(rule34);
+registry.register(rule35);
+registry.register(rule36);
+registry.register(rule37);
+registry.register(rule38);
+registry.register(rule39);
+registry.register(rule40);
+registry.register(rule41);
+registry.register(rule42);
+registry.register(rule43);
+registry.register(rule44);
+registry.register(rule45);
+registry.register(rule46);
+registry.register(rule47);
+registry.register(rule48);
+registry.register(rule49);
+registry.register(rule50);
+registry.register(rule51);
+registry.register(rule52);
+registry.register(rule53);
+registry.register(rule54);
+registry.register(rule55);
+registry.register(rule56);
+registry.register(rule57);
+registry.register(rule58);
+registry.register(rule59);
+registry.register(rule60);
+registry.register(rule61);
+registry.register(rule62);
+registry.register(rule63);
+registry.register(rule64);
+registry.register(rule65);
+registry.register(rule66);
+registry.register(rule67);
+registry.register(rule68);
+registry.register(rule69);
+registry.register(rule70);
+registry.register(rule71);
+registry.register(rule72);
+registry.register(rule73);
+registry.register(rule74);
+registry.register(rule75);
+registry.register(rule76);
+registry.register(rule77);
+registry.register(rule78);
+registry.register(rule79);
+var rulesById = registry.rulesById;
+var rules = registry.rules;
 
 // src/analyze.ts
 var hierarchyRank = {

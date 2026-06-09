@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "test_in_prod.main",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "test_in_prod",
   description: "Page contains <code>console.log</code> statements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("test_in_prod.main", context),
+  evaluate: ({ rawHtml }) => /console\.log\s*\(/.test(rawHtml),
 };

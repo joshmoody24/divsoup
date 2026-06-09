@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "impa.main",
@@ -7,5 +6,8 @@ export const rule: AchievementRule = {
   group: "impa",
   description: "Page uses the Shadow DOM",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("impa.main", context),
+  evaluate: ({ rawHtml }) =>
+    /\.attachShadow\s*\(|<template\s+[^>]*shadowroot\s*=\s*["'](?:open|closed)["'][^>]*>/i.test(
+      rawHtml,
+    ),
 };

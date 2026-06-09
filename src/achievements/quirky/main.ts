@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "quirky.main",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "quirky",
   description: "Page renders in quirks mode",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("quirky.main", context),
+  evaluate: ({ rawHtml }) => !/<!DOCTYPE html>/i.test(rawHtml),
 };

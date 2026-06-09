@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "data_driven.main",
@@ -8,5 +7,8 @@ export const rule: AchievementRule = {
   description:
     "More than <strong>8</strong> elements on the page have <code>data-</code> attributes",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("data_driven.main", context),
+  evaluate: ({ doc }) =>
+    Array.from(doc.querySelectorAll("*")).filter((el) =>
+      Array.from(el.attributes).some((attr) => attr.name.startsWith("data-")),
+    ).length > 8,
 };

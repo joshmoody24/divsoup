@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { attrContentLength } from "../utils";
 
 export const rule: AchievementRule = {
   id: "locality_of_appearance.main",
@@ -8,5 +8,5 @@ export const rule: AchievementRule = {
   description:
     "Page has more CSS in <code>style</code> attributes than <code>class</code> attributes",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("locality_of_appearance.main", context),
+  evaluate: ({ doc }) => attrContentLength(doc, "style") > attrContentLength(doc, "class"),
 };

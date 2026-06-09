@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "todo.gold",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code> a <strong>dozen</strong> or more times",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("todo.gold", context),
+  evaluate: ({ rawHtml }) => rawHtml.toLowerCase().split("todo").length >= 12,
 };

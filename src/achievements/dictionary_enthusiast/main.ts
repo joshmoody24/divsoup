@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "dictionary_enthusiast.main",
@@ -8,5 +7,7 @@ export const rule: AchievementRule = {
   description:
     "Page uses definition elements (<code>&lt;dfn&gt;</code> or <code>&lt;dl&gt;</code> with <code>&lt;dt&gt;</code> and <code>&lt;dd&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("dictionary_enthusiast.main", context),
+  evaluate: ({ doc }) =>
+    doc.querySelector("dfn") !== null ||
+    (doc.querySelector("dl dt") !== null && doc.querySelector("dl dd") !== null),
 };

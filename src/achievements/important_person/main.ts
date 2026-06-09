@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "important_person.main",
@@ -8,5 +7,5 @@ export const rule: AchievementRule = {
   description:
     "The phrase <code>!important</code> appears <strong>10</strong> or more times on the page",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("important_person.main", context),
+  evaluate: ({ rawHtml }) => (rawHtml.match(/!important/g) ?? []).length >= 10,
 };

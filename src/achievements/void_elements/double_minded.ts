@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { analyzeVoidElements } from "../utils";
 
 export const rule: AchievementRule = {
   id: "void_elements.double_minded",
@@ -8,5 +8,8 @@ export const rule: AchievementRule = {
   description:
     "Some void elements include a trailing slash (<code>&lt;img /&gt;</code>) and some do not (<code>&lt;img&gt;</code>)",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("void_elements.double_minded", context),
+  evaluate: ({ rawHtml }) => {
+    const result = analyzeVoidElements(rawHtml);
+    return result.total >= 2 && result.withSlash > 0 && result.withoutSlash > 0;
+  },
 };

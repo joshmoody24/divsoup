@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "too_meta.main",
@@ -8,5 +7,5 @@ export const rule: AchievementRule = {
   description:
     "Page <code>&lt;head&gt;</code> includes <strong>8+</strong> <code>&lt;meta&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("too_meta.main", context),
+  evaluate: ({ doc }) => doc.querySelectorAll("head meta").length >= 8,
 };

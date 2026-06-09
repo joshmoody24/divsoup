@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { longestSingleChildChain } from "../utils";
 
 export const rule: AchievementRule = {
   id: "tree_shenanigans.deep_puddle",
@@ -8,5 +8,8 @@ export const rule: AchievementRule = {
   description:
     "The page body contains a descendant chain of at least <strong>#{@min_chain_length}</strong> elements \\\n        where each parent has only one child",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("tree_shenanigans.deep_puddle", context),
+  evaluate: ({ doc }) => {
+    if (!doc.body) return false;
+    return longestSingleChildChain(doc.body) >= 8;
+  },
 };

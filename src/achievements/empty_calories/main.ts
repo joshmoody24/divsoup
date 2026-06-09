@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "empty_calories.main",
@@ -8,5 +7,8 @@ export const rule: AchievementRule = {
   description:
     "Page contains <strong>10</strong> or more empty <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code> elements",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("empty_calories.main", context),
+  evaluate: ({ doc }) =>
+    Array.from(doc.querySelectorAll("div, span")).filter(
+      (el) => el.children.length === 0 && (el.textContent ?? "").trim() === "",
+    ).length >= 10,
 };

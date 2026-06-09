@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { containsCustomElement, detectWebFrameworks } from "../utils";
 
 export const rule: AchievementRule = {
   id: "framework_phobia.main",
@@ -7,5 +7,8 @@ export const rule: AchievementRule = {
   group: "framework_phobia",
   description: "Page contains a custom HTML element and does not use a JS framework",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("framework_phobia.main", context),
+  evaluate: ({ doc, rawHtml }) => {
+    const frameworks = detectWebFrameworks(doc);
+    return containsCustomElement(rawHtml) && frameworks.length === 0;
+  },
 };

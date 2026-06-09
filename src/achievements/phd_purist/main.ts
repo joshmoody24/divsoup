@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "phd_purist.main",
@@ -7,5 +6,10 @@ export const rule: AchievementRule = {
   group: "phd_purist",
   description: "Use the <code>&lt;math&gt;</code> element for something nontrivial",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("phd_purist.main", context),
+  evaluate: ({ doc }) =>
+    Array.from(doc.querySelectorAll("math")).some(
+      (math) =>
+        math.children.length >= 5 ||
+        math.querySelector("mfrac, msqrt, mroot, msubsup, munderover, mtable") !== null,
+    ),
 };

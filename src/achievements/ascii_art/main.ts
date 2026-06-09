@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { hasAsciiArtComment } from "../utils";
 
 export const rule: AchievementRule = {
   id: "ascii_art.main",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "ascii_art",
   description: "Page contains an ASCII art HTML <code>&lt;!-- comment --&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("ascii_art.main", context),
+  evaluate: ({ rawHtml }) => hasAsciiArtComment(rawHtml),
 };

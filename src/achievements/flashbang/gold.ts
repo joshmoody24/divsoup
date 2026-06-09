@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { calculateBrightness, extractBackgroundColor, hasDarkModeSupport } from "../utils";
 
 export const rule: AchievementRule = {
   id: "flashbang.gold",
@@ -8,5 +8,9 @@ export const rule: AchievementRule = {
   description:
     "The primary background color is <strong>light</strong> when the user prefers <strong>dark mode</strong>",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("flashbang.gold", context),
+  evaluate: ({ doc, rawHtml }) => {
+    if (hasDarkModeSupport(doc, rawHtml)) return false;
+    const bg = extractBackgroundColor(doc, rawHtml);
+    return bg !== null && calculateBrightness(bg) > 0.85;
+  },
 };

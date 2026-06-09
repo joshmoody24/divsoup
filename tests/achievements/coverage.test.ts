@@ -244,7 +244,7 @@ const importedMarkers = [
   t76,
   t77,
   t78,
-] as const;
+];
 
 describe("achievement test coverage", () => {
   it("includes a test marker for every achievement", () => {

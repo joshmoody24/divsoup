@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "tower_of_babel.main",
@@ -8,5 +7,10 @@ export const rule: AchievementRule = {
   description:
     "Page contains at least <strong>2</strong> <code>lang</code> attributes with different values",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("tower_of_babel.main", context),
+  evaluate: ({ doc }) =>
+    new Set(
+      Array.from(doc.querySelectorAll("*[lang]"))
+        .map((el) => el.getAttribute("lang") ?? "")
+        .filter(Boolean),
+    ).size >= 2,
 };

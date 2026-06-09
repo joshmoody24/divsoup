@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { getClassRatio } from "../utils";
 
 export const rule: AchievementRule = {
   id: "classy.silver",
@@ -8,5 +8,5 @@ export const rule: AchievementRule = {
   description:
     "HTML <code>class</code> attributes make up more than <strong>25%</strong> of the page's size",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("classy.silver", context),
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.25,
 };

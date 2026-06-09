@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { hasOnAttribute } from "../utils";
 
 export const rule: AchievementRule = {
   id: "scriptonite.silver",
@@ -8,5 +8,5 @@ export const rule: AchievementRule = {
   description:
     "No <code>&lt;script&gt;</code> tags or <code>on</code> attributes appear in the page",
   hierarchy: "silver",
-  evaluate: (context) => evaluateRule("scriptonite.silver", context),
+  evaluate: ({ doc }) => doc.querySelector("script") === null && !hasOnAttribute(doc),
 };

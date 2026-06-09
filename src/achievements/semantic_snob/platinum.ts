@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "semantic_snob.platinum",
@@ -8,5 +7,8 @@ export const rule: AchievementRule = {
   description:
     "Fulfill the criteria for <strong>Semantic Snob</strong> and also do not use a single <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code>",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateRule("semantic_snob.platinum", context),
+  evaluate: ({ doc }) =>
+    ["header", "nav", "main", "article", "section", "aside", "footer"].every(
+      (tag) => doc.querySelector(tag) !== null,
+    ) && doc.querySelector("div, span") === null,
 };

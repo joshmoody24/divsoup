@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "vintage.main",
@@ -7,5 +6,5 @@ export const rule: AchievementRule = {
   group: "vintage",
   description: "Page uses a nested table layout",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("vintage.main", context),
+  evaluate: ({ doc }) => doc.querySelector("table table") !== null,
 };

@@ -1,5 +1,4 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "progressive.main",
@@ -8,5 +7,6 @@ export const rule: AchievementRule = {
   description:
     "Page contains both a <code>&lt;progress&gt;</code> and <code>&lt;meter&gt;</code> element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("progressive.main", context),
+  evaluate: ({ doc }) =>
+    doc.querySelector("progress") !== null && doc.querySelector("meter") !== null,
 };

@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { getDivRatio } from "../utils";
 
 export const rule: AchievementRule = {
   id: "div_soup.gold",
@@ -8,5 +8,5 @@ export const rule: AchievementRule = {
   description:
     "More than <strong>75%</strong> of the HTML elements in the page are <code>&lt;div&gt;</code> elements",
   hierarchy: "gold",
-  evaluate: (context) => evaluateRule("div_soup.gold", context),
+  evaluate: ({ doc }) => getDivRatio(doc) > 0.75,
 };

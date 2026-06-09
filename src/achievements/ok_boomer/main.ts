@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateRule } from "../evaluate";
+import { DEPRECATED_ELEMENTS } from "../utils";
 
 export const rule: AchievementRule = {
   id: "ok_boomer.main",
@@ -7,5 +7,6 @@ export const rule: AchievementRule = {
   group: "ok_boomer",
   description: "Page uses a deprecated HTML element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateRule("ok_boomer.main", context),
+  evaluate: ({ doc }) =>
+    Array.from(DEPRECATED_ELEMENTS).some((tag) => doc.querySelector(tag) !== null),
 };
