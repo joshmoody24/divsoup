@@ -1,12 +1,14 @@
 import type { AchievementRule } from "../types";
 import { getClassRatio } from "../utils";
 
+const requiredClassRatio = 0.5;
+const requiredClassPercentage = `${requiredClassRatio * 100}%`;
+
 export const rule: AchievementRule = {
   id: "classy.platinum",
   title: "Opulent",
   group: "classy",
-  description:
-    "HTML <code>class</code> attributes make up more than <strong>50%</strong> of the page's size",
+  description: `HTML <code>class</code> attributes make up more than <strong>${requiredClassPercentage}</strong> of the page's size`,
   hierarchy: "platinum",
-  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > 0.5,
+  evaluate: ({ doc, rawHtml }) => getClassRatio(doc, rawHtml) > requiredClassRatio,
 };

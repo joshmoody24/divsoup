@@ -4,12 +4,13 @@
   "description": "A site that scans websites and gives them weird awards based on how cursed their HTML is.",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/browser_app.ts --bundle --format=esm --target=es2022 --outfile=static_html/app.js",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "build": "./cmd/build",
+    "format": "./cmd/format",
+    "format:check": "./cmd/format-check",
+    "serve": "./cmd/serve",
+    "typecheck": "./cmd/typecheck",
+    "test": "./cmd/test",
+    "test:watch": "./cmd/test-watch"
   },
   "repository": {
     "type": "git",

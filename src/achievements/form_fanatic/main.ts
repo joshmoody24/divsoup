@@ -6,8 +6,7 @@ export const rule: AchievementRule = {
   id: "form_fanatic.main",
   title: "Form Fanatic",
   group: "form_fanatic",
-  description:
-    "Page has a <code>&lt;form&gt;</code> containing <strong>5</strong> or more different input types",
+  description: `Page has a <code>&lt;form&gt;</code> containing <strong>${REQUIRED_INPUT_TYPES}</strong> or more different input types`,
   hierarchy: "standard",
   evaluate: ({ doc }) => {
     const forms = Array.from(doc.querySelectorAll("form"));

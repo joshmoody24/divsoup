@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+./cmd/build
+python3 -m http.server "${PORT:-8000}" --directory static_html

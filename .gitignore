@@ -44,3 +44,7 @@ erl_crash.dump
 
 # Node
 /node_modules/
+
+# Generated static bundle
+/static_html/app.js
+/static_html/achievements.html

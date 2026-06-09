@@ -1,6 +1,8 @@
 import type { AchievementRule } from "../types";
 import { analyzeVoidElements } from "../utils";
 
+const minimumVoidElements = 2;
+
 export const rule: AchievementRule = {
   id: "void_elements.double_minded",
   title: "Double-minded",
@@ -10,6 +12,6 @@ export const rule: AchievementRule = {
   hierarchy: "standard",
   evaluate: ({ rawHtml }) => {
     const result = analyzeVoidElements(rawHtml);
-    return result.total >= 2 && result.withSlash > 0 && result.withoutSlash > 0;
+    return result.total >= minimumVoidElements && result.withSlash > 0 && result.withoutSlash > 0;
   },
 };

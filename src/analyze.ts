@@ -54,7 +54,7 @@ export const analyzeHtml = (rawHtml: string, parser?: HtmlParser): AnalysisResul
 
 export const sortAchievements = (achievements: AchievementRule[]): AchievementRule[] =>
   [...achievements].sort((left, right) => {
-    const hierarchyDelta = hierarchyRank[right.hierarchy] - hierarchyRank[left.hierarchy];
+    const hierarchyDelta = hierarchyRank[left.hierarchy] - hierarchyRank[right.hierarchy];
     if (hierarchyDelta !== 0) return hierarchyDelta;
 
     const groupDelta = left.group.localeCompare(right.group);

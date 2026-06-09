@@ -1,6 +1,8 @@
 import type { AchievementRule } from "../types";
 import { calculateBrightness, extractBackgroundColor, hasDarkModeSupport } from "../utils";
 
+const maximumComfortableBrightness = 0.85;
+
 export const rule: AchievementRule = {
   id: "flashbang.gold",
   title: "Flashbang",
@@ -11,6 +13,6 @@ export const rule: AchievementRule = {
   evaluate: ({ doc, rawHtml }) => {
     if (hasDarkModeSupport(doc, rawHtml)) return false;
     const bg = extractBackgroundColor(doc, rawHtml);
-    return bg !== null && calculateBrightness(bg) > 0.85;
+    return bg !== null && calculateBrightness(bg) > maximumComfortableBrightness;
   },
 };

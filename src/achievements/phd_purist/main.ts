@@ -1,5 +1,7 @@
 import type { AchievementRule } from "../types";
 
+const minimumNontrivialChildCount = 5;
+
 export const rule: AchievementRule = {
   id: "phd_purist.main",
   title: "PhD Purist",
@@ -9,7 +11,7 @@ export const rule: AchievementRule = {
   evaluate: ({ doc }) =>
     Array.from(doc.querySelectorAll("math")).some(
       (math) =>
-        math.children.length >= 5 ||
+        math.children.length >= minimumNontrivialChildCount ||
         math.querySelector("mfrac, msqrt, mroot, msubsup, munderover, mtable") !== null,
     ),
 };

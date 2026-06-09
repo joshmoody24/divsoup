@@ -1,6 +1,8 @@
 import type { AchievementRule } from "../types";
 import { BULLET_CHARS } from "../utils";
 
+const requiredBulletItems = 2;
+
 export const rule: AchievementRule = {
   id: "bullet_hell.main",
   title: "Bullet Hell",
@@ -21,9 +23,9 @@ export const rule: AchievementRule = {
           .split(/\r?\n/)
           .map((line) => line.trim())
           .filter((line) => BULLET_CHARS.some((bullet) => line.startsWith(bullet)));
-        return bulletLines.length >= 2;
+        return bulletLines.length >= requiredBulletItems;
       });
 
-    return (bulletElements.length >= 2 || textWithBullets) && htmlLists === 0;
+    return (bulletElements.length >= requiredBulletItems || textWithBullets) && htmlLists === 0;
   },
 };
