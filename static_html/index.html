@@ -27,32 +27,54 @@
         <section class="home-container">
           <div class="home-intro">
             <h1>divsoup</h1>
+
             <p>
-              divsoup analyzes pasted HTML and awards achievements based on structure, styling
-              practices, and code quirks.
+              divsoup analyzes websites and awards achievements based on HTML structure, styling
+              practices, and code quirks. Paste your HTML below to discover what achievements it
+              earns!
             </p>
+
+            <div class="features">
+              <div class="feature">
+                <strong>Analyze Markup</strong>
+                <p>Get judged for your HTML structure, semantic choices, and element usage.</p>
+              </div>
+              <div class="feature">
+                <strong>Earn "Achievements"</strong>
+                <p>
+                  From Bronze to Platinum in various weird categories. Collect them all if you hate
+                  your life.
+                </p>
+              </div>
+              <div class="feature">
+                <strong>Go to Prison</strong>
+                <p>Not really, but if you earn certain achievments, you probably deserve it.</p>
+              </div>
+            </div>
           </div>
 
           <form id="analyze-form">
-            <fieldset>
-              <legend>Analyze HTML</legend>
-              <div class="form-group">
-                <label for="html-input">HTML</label>
-                <textarea id="html-input" name="html" rows="18" spellcheck="false"></textarea>
-              </div>
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Analyze HTML</button>
-                <button type="button" id="load-sample" class="btn">Load Sample</button>
-                <button type="button" id="clear-input" class="btn">Clear</button>
-              </div>
-            </fieldset>
+            <div class="form-group">
+              <label for="html-input">HTML</label>
+              <textarea id="html-input" name="html" rows="18" spellcheck="false"></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Analyze HTML</button>
+              <button type="button" id="load-sample" class="btn">Load Sample</button>
+              <button type="button" id="clear-input" class="btn">Clear</button>
+            </div>
           </form>
 
-          <section class="analysis-panel" aria-live="polite">
+          <section class="analysis-panel" aria-live="polite" hidden>
             <h2>Results</h2>
             <p id="analysis-summary"></p>
             <div id="analysis-results" class="analysis-results"></div>
           </section>
+
+          <p class="home-cta">
+            Check out the <a href="achievements.html">complete achievement list</a> to see what you
+            can earn!
+          </p>
         </section>
       </main>
 

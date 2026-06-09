@@ -29,19 +29,27 @@ const form = document.querySelector<HTMLFormElement>("#analyze-form");
 const input = document.querySelector<HTMLTextAreaElement>("#html-input");
 const sampleButton = document.querySelector<HTMLButtonElement>("#load-sample");
 const clearButton = document.querySelector<HTMLButtonElement>("#clear-input");
+const analysisPanel = document.querySelector<HTMLElement>(".analysis-panel");
 const summary = document.querySelector<HTMLElement>("#analysis-summary");
 const results = document.querySelector<HTMLElement>("#analysis-results");
 
-const renderEmptyState = (summaryElement: HTMLElement, resultsElement: HTMLElement): void => {
-  summaryElement.textContent = "Paste HTML and run the analyzer.";
+const resetAnalysis = (
+  analysisPanelElement: HTMLElement,
+  summaryElement: HTMLElement,
+  resultsElement: HTMLElement,
+): void => {
+  analysisPanelElement.hidden = true;
+  summaryElement.textContent = "";
   resultsElement.replaceChildren();
 };
 
 const renderAnalysis = (
   rawHtml: string,
+  analysisPanelElement: HTMLElement,
   summaryElement: HTMLElement,
   resultsElement: HTMLElement,
 ): void => {
+  analysisPanelElement.hidden = false;
   const html = rawHtml.trim();
 
   if (!html) {
@@ -115,24 +123,25 @@ if (
   input !== null &&
   sampleButton !== null &&
   clearButton !== null &&
+  analysisPanel !== null &&
   summary !== null &&
   results !== null
 ) {
   sampleButton.addEventListener("click", () => {
     input.value = sampleHtml;
-    renderAnalysis(input.value, summary, results);
+    renderAnalysis(input.value, analysisPanel, summary, results);
   });
 
   clearButton.addEventListener("click", () => {
     input.value = "";
-    renderEmptyState(summary, results);
+    resetAnalysis(analysisPanel, summary, results);
     input.focus();
   });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    renderAnalysis(input.value, summary, results);
+    renderAnalysis(input.value, analysisPanel, summary, results);
   });
 
-  renderEmptyState(summary, results);
+  resetAnalysis(analysisPanel, summary, results);
 }
