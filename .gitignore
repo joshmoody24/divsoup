@@ -41,3 +41,10 @@ erl_crash.dump
 /iac/terraform.rc
 
 **/.claude/settings.local.json
+
+# Node
+/node_modules/
+
+# Generated static bundle
+/static_html/app.js
+/static_html/achievements.html

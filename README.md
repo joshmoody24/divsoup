@@ -1,5 +1,10 @@
 # divsoup
 
-A site that scans websites and gives them weird awards based on how cursed their HTML is.
+A static TypeScript HTML analyzer that awards weird achievements based on pasted markup.
 
-[https://divsoup.net](https://divsoup.net)
+## Development
+
+- `npm ci`
+- `npm run build`
+- `npm run typecheck`
+- `npm test`
