@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateLegacyRule } from "../legacy_evaluate";
+import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "ascii_art.main",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "ascii_art",
   description: "Page contains an ASCII art HTML <code>&lt;!-- comment --&gt;</code>",
   hierarchy: "standard",
-  evaluate: (context) => evaluateLegacyRule("ascii_art.main", context),
+  evaluate: (context) => evaluateRule("ascii_art.main", context),
 };

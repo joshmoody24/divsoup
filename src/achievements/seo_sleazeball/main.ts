@@ -4,7 +4,8 @@ export const rule: AchievementRule = {
   id: "seo_sleazeball.main",
   title: "SEO Sleazeball",
   group: "seo_sleazeball",
-  description: "Page includes Open Graph, Twitter Card, and description <code>&lt;meta&gt;</code> tags",
+  description:
+    "Page includes Open Graph, Twitter Card, and description <code>&lt;meta&gt;</code> tags",
   hierarchy: "standard",
   evaluate: ({ doc }) => {
     const hasOpenGraph = doc.querySelector('meta[property^="og:"]') !== null;

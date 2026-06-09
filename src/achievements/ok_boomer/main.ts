@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateLegacyRule } from "../legacy_evaluate";
+import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "ok_boomer.main",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "ok_boomer",
   description: "Page uses a deprecated HTML element",
   hierarchy: "standard",
-  evaluate: (context) => evaluateLegacyRule("ok_boomer.main", context),
+  evaluate: (context) => evaluateRule("ok_boomer.main", context),
 };

@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateLegacyRule } from "../legacy_evaluate";
+import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "scriptonite.platinum",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "the_web_is_for_documents",
   description: "Page is entirely plaintext - no CSS, JavaScript, or HTML elements",
   hierarchy: "platinum",
-  evaluate: (context) => evaluateLegacyRule("scriptonite.platinum", context),
+  evaluate: (context) => evaluateRule("scriptonite.platinum", context),
 };

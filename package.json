@@ -4,6 +4,9 @@
   "description": "A site that scans websites and gives them weird awards based on how cursed their HTML is.",
   "main": "index.js",
   "scripts": {
+    "build": "esbuild src/browser_app.ts --bundle --format=esm --target=es2022 --outfile=static_html/app.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -22,7 +25,9 @@
   "homepage": "https://github.com/joshmoody24/divsoup#readme",
   "devDependencies": {
     "@types/node": "^25.9.2",
+    "esbuild": "^0.27.0",
     "jsdom": "^29.1.1",
+    "prettier": "^3.7.4",
     "typescript": "^6.0.3",
     "vitest": "^3.2.6"
   },

@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateLegacyRule } from "../legacy_evaluate";
+import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "backwards_compatibility.main",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "backwards_compatibility",
   description: "Page contains an <code>&lt;!--[if IE]&gt;...&lt;![endif]--&gt;</code> comment",
   hierarchy: "standard",
-  evaluate: (context) => evaluateLegacyRule("backwards_compatibility.main", context),
+  evaluate: (context) => evaluateRule("backwards_compatibility.main", context),
 };

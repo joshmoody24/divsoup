@@ -1,9 +1,10 @@
 # divsoup
 
-A TypeScript HTML analyzer that awards weird achievements based on how cursed your markup is.
+A static TypeScript HTML analyzer that awards weird achievements based on pasted markup.
 
 ## Development
 
 - `npm ci`
+- `npm run build`
 - `npm run typecheck`
 - `npm test`

@@ -1,5 +1,5 @@
 import type { AchievementRule } from "../types";
-import { evaluateLegacyRule } from "../legacy_evaluate";
+import { evaluateRule } from "../evaluate";
 
 export const rule: AchievementRule = {
   id: "todo.gold",
@@ -7,5 +7,5 @@ export const rule: AchievementRule = {
   group: "todo",
   description: "Page contains the phrase <code>TODO</code> a <strong>dozen</strong> or more times",
   hierarchy: "gold",
-  evaluate: (context) => evaluateLegacyRule("todo.gold", context),
+  evaluate: (context) => evaluateRule("todo.gold", context),
 };

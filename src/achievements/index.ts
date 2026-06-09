@@ -80,7 +80,12 @@ import { rule as rule78 } from "./zalgo/main";
 
 import type { AchievementId, AchievementRule } from "./types";
 export { achievementIds } from "./types";
-export type { AchievementContext, AchievementHierarchy, AchievementId, AchievementRule } from "./types";
+export type {
+  AchievementContext,
+  AchievementHierarchy,
+  AchievementId,
+  AchievementRule,
+} from "./types";
 
 export const rulesById = {
   "anarchic_style_sheets.main": rule0,
