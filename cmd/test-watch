@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-vitest "$@"
+npm run test:watch -- "$@"

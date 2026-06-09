@@ -1,18 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-generated_dir="$(mktemp -d)"
-cleanup() {
-  rm -rf "$generated_dir"
-}
-trap cleanup EXIT
-
-esbuild src/generate_achievements_page.ts \
-  --bundle \
-  --platform=node \
-  --format=esm \
-  --target=node24 \
-  --outfile="$generated_dir/generate_achievements_page.mjs"
-node "$generated_dir/generate_achievements_page.mjs"
-
-esbuild src/browser_app.ts --bundle --format=esm --target=es2022 --outfile=static_html/app.js
+npm run build

@@ -1,6 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { rules } from "./achievements";
 import { sortAchievements, titleizeGroup } from "./analyze";
 import type { AchievementRule } from "./achievements";
@@ -11,12 +10,7 @@ interface AchievementGroup {
   achievements: AchievementRule[];
 }
 
-const pagePath = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "..",
-  "static_html",
-  "achievements.html",
-);
+const pagePath = join(process.cwd(), "static_html", "achievements.html");
 
 const groupedAchievements = (): AchievementGroup[] =>
   Array.from(
